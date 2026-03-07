@@ -1,14 +1,9 @@
-# JEF 1.1.5 - 1.1.6 Changelog
+# JEF 1.1.8 - 1.1.9 Changelog
 
 # Bug fixes
-* i fogor what bugs were fixed
+* Fixed jw conflicting with NEF's island waypoints.
+* Fixed random crashes caused by i forgor
 
-## Mining
-* Added fetchur helper.
-
-
-  
-## Misc
-* Ported performance hud from [Odin](https://github.com/odtheking/OdinLegacy)
-* Added skill XP display - displays XP needed to reach max skill, catacombs level, dungeon class on shift 
-
+# Additions
+* Better GUI for waypoints
+* Tiny kebab.
