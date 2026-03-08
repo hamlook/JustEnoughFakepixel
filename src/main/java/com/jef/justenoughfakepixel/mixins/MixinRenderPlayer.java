@@ -19,8 +19,15 @@ public class MixinRenderPlayer {
         if (!"TURKISHKEBAP".equals(player.getName())) return;
         GlStateManager.scale(SCALE, SCALE, SCALE);
     }
+    @Inject(method = "preRenderCallback(Lnet/minecraft/client/entity/AbstractClientPlayer;F)V",
+        at = @At("TAIL"))
     private void jef$tinysoup(AbstractClientPlayer player, float partialTicks, CallbackInfo ci) {
         if (!"mansoob201".equals(player.getName())) return;
         GlStateManager.scale(SCALE, SCALE, SCALE);
     }
+     @Inject(method = "preRenderCallback(Lnet/minecraft/client/entity/AbstractClientPlayer;F)V",
+        at = @At("TAIL"))
+    private void jef$tinyprotocol(AbstractClientPlayer player, float partialTicks, CallbackInfo ci) {
+        if (!"kanishka007".equals(player.getName())) return;
+        GlStateManager.scale(SCALE, SCALE, SCALE);
 }
