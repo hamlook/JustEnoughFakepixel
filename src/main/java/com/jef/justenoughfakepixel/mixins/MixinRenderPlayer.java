@@ -30,4 +30,5 @@ public class MixinRenderPlayer {
     private void jef$tinyprotocol(AbstractClientPlayer player, float partialTicks, CallbackInfo ci) {
         if (!"kanishka007".equals(player.getName())) return;
         GlStateManager.scale(SCALE, SCALE, SCALE);
+    }
 }
