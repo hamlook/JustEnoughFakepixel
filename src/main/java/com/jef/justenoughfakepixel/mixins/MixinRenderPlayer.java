@@ -28,7 +28,7 @@ public class MixinRenderPlayer {
      @Inject(method = "preRenderCallback(Lnet/minecraft/client/entity/AbstractClientPlayer;F)V",
         at = @At("TAIL"))
     private void jef$tinyprotocol(AbstractClientPlayer player, float partialTicks, CallbackInfo ci) {
-        if (!"kanishka007".equals(player.getName())) return;
+        if (!"Kanishka007".equals(player.getName())) return;
         GlStateManager.scale(SCALE, SCALE, SCALE);
     }
 }
