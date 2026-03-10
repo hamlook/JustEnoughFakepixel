@@ -3,6 +3,7 @@ package com.jef.justenoughfakepixel.utils;
 import com.jef.justenoughfakepixel.features.diana.DianaTracker;
 import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -17,6 +18,10 @@ public class PartyCommands {
 
     private static final Pattern PARTY_MSG =
             Pattern.compile("^Party > (?:\\[[^]]*])?\\s*(\\w{1,16}):\\s*(.+)$");
+
+    // 10s cooldown for !help to prevent spam
+    private static final long HELP_COOLDOWN_MS = 10_000L;
+    private long lastHelpMs = 0L;
 
     private final Minecraft mc = Minecraft.getMinecraft();
     private final ScheduledExecutorService scheduler =
@@ -37,18 +42,16 @@ public class PartyCommands {
 
         switch (cmd) {
 
+            // pba
             case "!pb": {
                 String arg1 = parts.length >= 2 ? parts[1] : null;
                 String arg2 = parts.length >= 3 ? parts[2] : null;
-                if (arg1 == null) {
-                    respond("Usage: !pb <floor> | !pb <floor> br | !pb p1-p5");
-                    return;
-                }
+                if (arg1 == null) { respond("Usage: !pb <floor> | !pb <floor> br | !pb p1-p5"); return; }
                 respond(DungeonStats.getFormattedPb(arg1, arg2));
                 break;
             }
 
-
+            // Diana Commands
             case "!bph":
                 respond(DianaTracker.getBphMessage());
                 break;
@@ -65,16 +68,38 @@ public class PartyCommands {
                 respond(DianaTracker.getRelicMessage());
                 break;
 
+            case "!drops":
+                respond(DianaTracker.getDropsMessage());
+                break;
+
+            case "!help": {
+                long now = System.currentTimeMillis();
+                if (now - lastHelpMs < HELP_COOLDOWN_MS) break; // cooldown to counter spam
+                lastHelpMs = now;
+                printLocal(DianaTracker.getHelpMessage());
+                break;
+            }
+
             default:
                 break;
         }
     }
 
+    /** Sends a message to party chat after a short delay. */
     private void respond(String msg) {
         if (mc.thePlayer == null) return;
         scheduler.schedule(() -> {
             if (mc.thePlayer != null)
                 mc.thePlayer.sendChatMessage("/pc " + msg);
         }, 1500, TimeUnit.MILLISECONDS);
+    }
+
+    /** Prints a message directly into the chat */
+    private void printLocal(String msg) {
+        if (mc.thePlayer == null) return;
+        // split on \n and add each line
+        for (String line : msg.split("\n")) {
+            mc.thePlayer.addChatMessage(new ChatComponentText(line));
+        }
     }
 }

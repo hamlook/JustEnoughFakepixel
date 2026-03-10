@@ -2,12 +2,17 @@ package com.jef.justenoughfakepixel.features.diana;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.minecraft.client.Minecraft;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.StringUtils;
 
 import java.io.*;
 
-
+/**
+ * Singleton that owns the persisted {@link DianaData} and all transient runtime state.
+ * Call {@link #initFile(File)} from JefMod.preInit and {@link #load()} from JefMod.clientInit.
+ */
 public class DianaStats {
-
 
     private static DianaStats INSTANCE;
 
@@ -20,18 +25,18 @@ public class DianaStats {
 
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Minecraft mc = Minecraft.getMinecraft();
 
     private File      file = null;
     private DianaData data = new DianaData();
 
-    // Transient (not persisted) — written by DianaTracker, read by DianaOverlay
-    public volatile long   lastSpadeUseMs = 0L;
-    public volatile String lastDropType   = null;   // "feather" | "souvenir" | "crown" | "coins"
-    public volatile long   lastDropAmount = 0L;
+    // Transient
+    public volatile boolean idlePaused    = false;
+    public volatile String  lastDropType  = null;   // "feather"|"souvenir"|"crown"|"coins"|"shelmet"|"remedies"|"plushie"
+    public volatile long    lastDropAmount = 0L;
 
     // File I/O
 
-    /** Call once during pre-init with the JEF config directory. */
     public void initFile(File configDir) {
         this.file = new File(configDir, "diana_stats.json");
     }
@@ -55,34 +60,41 @@ public class DianaStats {
         }
     }
 
-    // Reset
 
     public void reset() {
-        data          = new DianaData();
-        lastSpadeUseMs = 0L;
+        data           = new DianaData();
+        idlePaused     = false;
         lastDropType   = null;
         lastDropAmount = 0L;
     }
 
-    // Accessors
-    public DianaData getData() {
-        return data;
-    }
+
+    public DianaData getData() { return data; }
 
     /**
-     * Returns {@code true} when the player right-clicked the Ancestral Spade
-     * within the last 5 minutes, meaning active tracking is appropriate.
+     * Tracking is active when the Ancestral Spade is in the player's hotbar
+     * and the player has not been idle for 20+ seconds.
      */
     public boolean isTracking() {
-        return System.currentTimeMillis() - lastSpadeUseMs < 5 * 60_000L;
+        return hasSpadeInHotbar() && !idlePaused;
     }
 
-    // Computed Stats
-
     /**
-     * Burrows per hour based on total burrows and session start time.
-     * Returns 0 if no session has started yet.
+     * Returns true if Ancestral Spade is present in any hotbar slot (0–8).
      */
+    public static boolean hasSpadeInHotbar() {
+        if (mc.thePlayer == null) return false;
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.thePlayer.inventory.mainInventory[i];
+            if (stack != null && stack.hasDisplayName()
+                    && StringUtils.stripControlCodes(stack.getDisplayName()).contains("Ancestral Spade")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     public double getBph() {
         if (data.sessionStartMs <= 0 || data.totalBurrows == 0) return 0.0;
         long elapsed = System.currentTimeMillis() - data.sessionStartMs;
@@ -90,13 +102,9 @@ public class DianaStats {
         return data.totalBurrows / (elapsed / 3_600_000.0);
     }
 
-    /**
-     * Cumulative probability (0–100 %) that at least one Inquisitor should
-     * have spawned by now, using a ~1% per-mob baseline.
-     */
+
     public double getInqChance() {
-        int n = data.mobsSinceInq;
-        if (n <= 0) return 0.0;
-        return (1.0 - Math.pow(0.99, n)) * 100.0;
+        if (data.totalInqs == 0 || data.totalMobs == 0) return -1.0;
+        return (double) data.totalInqs / data.totalMobs * 100.0;
     }
 }

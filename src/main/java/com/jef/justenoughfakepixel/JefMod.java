@@ -58,14 +58,17 @@ public class JefMod {
         JefConfig.init();
         JefRepo.init();
 
-        // Point waypoint storage at the same config directory JEF uses
+        // Point waypoint storage at the same config directory as JEF
         WaypointStorage.getInstance().initFile(JefConfig.configDirectory);
+        // Point diana tracker to JEF config dir
+        DianaStats.getInstance().initFile(JefConfig.configDirectory);
     }
 
     @Mod.EventHandler
     public void clientInit(FMLInitializationEvent event) {
         JefConfig.register();
         WaypointStorage.getInstance().load();
+        DianaStats.getInstance().load();
         MinecraftForge.EVENT_BUS.register(this);
 
 

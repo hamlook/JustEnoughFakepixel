@@ -1,31 +1,22 @@
 package com.jef.justenoughfakepixel.features.diana;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.StringUtils;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Listens for Ancestral Spade use, burrow digs, mob spawns, rare drops, and
- * burrow treasure messages, then updates {@link DianaStats}
- *
- * Static helper methods are called by {@link com.jef.justenoughfakepixel.utils.PartyCommands}
- * to respond to party chat commands (!bph, !inq, !stick, !relic).
- */
+
 public class DianaTracker {
 
-    // Patterns (matched against unformatted text)
-
-    /** "You dug out a Griffin Burrow! (4/4)" */
+    // "You dug out a Griffin Borrow! (2/4)" — note: game says "Borrow" not "Burrow"
     private static final Pattern BURROW_DIG =
-            Pattern.compile("You dug out a Griffin Burrow! \\((\\d+)/(\\d+)\\)");
+            Pattern.compile("You dug out a Griffin Borrow! \\(([1-4])/4\\)");
 
-    /** "Uh oh! You dug out Minos Inquisitor" etc. */
+    // "Uh oh! You dug out Minos Inquisitor"
     private static final Pattern MOB_SPAWN =
             Pattern.compile("Uh oh! You dug out (.+)");
 
@@ -33,6 +24,8 @@ public class DianaTracker {
     private static final Pattern RARE_STICK    = Pattern.compile("RARE DROP! Daedalus Stick");
     private static final Pattern RARE_RELIC    = Pattern.compile("RARE DROP! Minos Relic");
     private static final Pattern RARE_CHIMERA  = Pattern.compile("RARE DROP! Chimera [IVX]+");
+
+    // Rare mob drops
     private static final Pattern RARE_SHELMET  = Pattern.compile("RARE DROP! Dwarf Turtle Shelmet");
     private static final Pattern RARE_REMEDIES = Pattern.compile("RARE DROP! Antique Remedies");
     private static final Pattern RARE_PLUSHIE  = Pattern.compile("RARE DROP! Crochet Tiger Plushie");
@@ -42,58 +35,70 @@ public class DianaTracker {
     private static final Pattern DROP_SOUVENIR = Pattern.compile("RARE DROP! You dug out a Washed-up Souvenir");
     private static final Pattern DROP_CROWN    = Pattern.compile("RARE DROP! You dug out a Crown of Greed");
     private static final Pattern DROP_COINS    = Pattern.compile("RARE DROP! You dug out ([\\d,]+) Coins");
-    private static final Pattern GRIFFIN_DOUBLED = Pattern.compile("Your Griffin doubled your rewards!");
+    private static final Pattern GRIFFIN_DOUBLED = Pattern.compile("Your Griffin doubled your rewards?!");
+
+    // Party chat
+    private static final Pattern PARTY_MSG =
+            Pattern.compile("^Party > (?:\\[[^]]*])?\\s*\\w{1,16}:\\s*(.+)$");
+
+
+    private static final int IDLE_TICKS = 20 * 20;   // 20 seconds × 20 ticks/s
+
+    private double lastX = Double.MAX_VALUE;
+    private double lastY = Double.MAX_VALUE;
+    private double lastZ = Double.MAX_VALUE;
+    private int    idleTick = 0;
 
     private final Minecraft mc = Minecraft.getMinecraft();
 
-    // Spade Right-Click Detection
-
     @SubscribeEvent
-    public void onInteract(PlayerInteractEvent event) {
-        if (event.entityPlayer != mc.thePlayer) return;
-        if (event.action != PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK &&
-                event.action != PlayerInteractEvent.Action.RIGHT_CLICK_AIR) return;
-        if (!isHoldingSpade()) return;
-        DianaStats.getInstance().lastSpadeUseMs = System.currentTimeMillis();
-    }
+    public void onTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        if (mc.thePlayer == null) return;
 
-    private boolean isHoldingSpade() {
-        if (mc.thePlayer == null) return false;
-        ItemStack held = mc.thePlayer.getHeldItem();
-        if (held == null || !held.hasDisplayName()) return false;
-        return StringUtils.stripControlCodes(held.getDisplayName()).contains("Ancestral Spade");
+        double x = mc.thePlayer.posX;
+        double y = mc.thePlayer.posY;
+        double z = mc.thePlayer.posZ;
+
+        if (x != lastX || y != lastY || z != lastZ) {
+            // Player moved — reset idle counter and unpause
+            lastX = x; lastY = y; lastZ = z;
+            idleTick = 0;
+            DianaStats.getInstance().idlePaused = false;
+        } else {
+            idleTick++;
+            if (idleTick >= IDLE_TICKS) {
+                DianaStats.getInstance().idlePaused = true;
+            }
+        }
     }
 
 
     @SubscribeEvent
     public void onChat(ClientChatReceivedEvent event) {
         if (mc.thePlayer == null) return;
-        // Use unformatted text — color codes stripped, raw message content
         String msg = StringUtils.stripControlCodes(event.message.getUnformattedText());
         DianaStats stats = DianaStats.getInstance();
+        handleBurrowDrops(msg, stats);
+        handleRareMobDrops(msg, stats);
+
+        if (!stats.isTracking()) return;
 
         handleBurrowDig(msg, stats);
         handleMobSpawn(msg, stats);
-        handleRareMobDrops(msg, stats);
-        handleBurrowDrops(msg, stats);
     }
 
-    // Burrow Dig
 
     private void handleBurrowDig(String msg, DianaStats stats) {
-        if (!stats.isTracking()) return;
         if (!BURROW_DIG.matcher(msg).find()) return;
-
         DianaData d = stats.getData();
         d.totalBurrows++;
         if (d.sessionStartMs < 0) d.sessionStartMs = System.currentTimeMillis();
         stats.save();
     }
 
-    // Mob Spawns
 
     private void handleMobSpawn(String msg, DianaStats stats) {
-        if (!stats.isTracking()) return;
         Matcher m = MOB_SPAWN.matcher(msg);
         if (!m.find()) return;
 
@@ -118,42 +123,22 @@ public class DianaTracker {
                 d.totalChamps++;
                 break;
             default:
-                // Minos Hunter, Gaia Construct, Siamese Lynxes, etc.
                 d.mobsSinceInq++;
                 break;
         }
         stats.save();
     }
 
-
     private void handleRareMobDrops(String msg, DianaStats stats) {
         DianaData d = stats.getData();
         boolean changed = false;
 
-        if (RARE_STICK.matcher(msg).find()) {
-            d.minotaursSinceStick = 0;
-            changed = true;
-        }
-        if (RARE_RELIC.matcher(msg).find()) {
-            d.champsSinceRelic = 0;
-            changed = true;
-        }
-        if (RARE_CHIMERA.matcher(msg).find()) {
-            d.inqsSinceChimera = 0;
-            changed = true;
-        }
-        if (RARE_SHELMET.matcher(msg).find()) {
-            d.dwarfTurtleShelmets++;
-            changed = true;
-        }
-        if (RARE_REMEDIES.matcher(msg).find()) {
-            d.antiqueRemedies++;
-            changed = true;
-        }
-        if (RARE_PLUSHIE.matcher(msg).find()) {
-            d.crochetTigerPlushies++;
-            changed = true;
-        }
+        if (RARE_STICK.matcher(msg).find())    { d.minotaursSinceStick = 0;    changed = true; }
+        if (RARE_RELIC.matcher(msg).find())    { d.champsSinceRelic = 0;       changed = true; }
+        if (RARE_CHIMERA.matcher(msg).find())  { d.inqsSinceChimera = 0;       changed = true; }
+        if (RARE_SHELMET.matcher(msg).find())  { d.dwarfTurtleShelmets++;      changed = true; }
+        if (RARE_REMEDIES.matcher(msg).find()) { d.antiqueRemedies++;           changed = true; }
+        if (RARE_PLUSHIE.matcher(msg).find())  { d.crochetTigerPlushies++;     changed = true; }
 
         if (changed) stats.save();
     }
@@ -162,34 +147,30 @@ public class DianaTracker {
     private void handleBurrowDrops(String msg, DianaStats stats) {
         DianaData d = stats.getData();
 
-        // "Your Griffin doubled your rewards!" always immediately follows the drop line
+        // Griffin doubled
         if (GRIFFIN_DOUBLED.matcher(msg).find()) {
             applyDoubledReward(stats);
             return;
         }
 
-        // Reset last-drop state before detecting a new drop
-        stats.lastDropType   = null;
-        stats.lastDropAmount = 0L;
-        boolean changed = false;
-
+        // Detect a new drop.
         if (DROP_FEATHER.matcher(msg).find()) {
             d.griffinFeathers++;
             stats.lastDropType   = "feather";
             stats.lastDropAmount = 1L;
-            changed = true;
+            stats.save();
 
         } else if (DROP_SOUVENIR.matcher(msg).find()) {
             d.souvenirs++;
             stats.lastDropType   = "souvenir";
             stats.lastDropAmount = 1L;
-            changed = true;
+            stats.save();
 
         } else if (DROP_CROWN.matcher(msg).find()) {
             d.crownsOfGreed++;
             stats.lastDropType   = "crown";
             stats.lastDropAmount = 1L;
-            changed = true;
+            stats.save();
 
         } else {
             Matcher coins = DROP_COINS.matcher(msg);
@@ -198,31 +179,26 @@ public class DianaTracker {
                 d.totalCoins += amount;
                 stats.lastDropType   = "coins";
                 stats.lastDropAmount = amount;
-                changed = true;
+                stats.save();
             }
         }
-
-        if (changed) stats.save();
     }
 
-    /** Applies a second copy of the last recorded drop when Griffin doubles rewards. */
     private void applyDoubledReward(DianaStats stats) {
         if (stats.lastDropType == null) return;
         DianaData d = stats.getData();
-
         switch (stats.lastDropType) {
-            case "feather":  d.griffinFeathers++;               break;
-            case "souvenir": d.souvenirs++;                     break;
-            case "crown":    d.crownsOfGreed++;                 break;
-            case "coins":    d.totalCoins += stats.lastDropAmount; break;
+            case "feather":   d.griffinFeathers++;                   break;
+            case "souvenir":  d.souvenirs++;                         break;
+            case "crown":     d.crownsOfGreed++;                     break;
+            case "coins":     d.totalCoins += stats.lastDropAmount;  break;
         }
-
+        // Clear so a second doubled message doesn't double again
         stats.lastDropType   = null;
         stats.lastDropAmount = 0L;
         stats.save();
     }
 
-    // ── Party Command Reply Helpers (called from PartyCommands.java
 
     public static String getBphMessage() {
         DianaStats s = DianaStats.getInstance();
@@ -233,8 +209,10 @@ public class DianaTracker {
     public static String getInqMessage() {
         DianaStats s = DianaStats.getInstance();
         DianaData  d = s.getData();
-        return String.format("[Diana] Mobs since Inq: %d | Inqs since Chimera: %d | Due: %.1f%%",
-                d.mobsSinceInq, d.inqsSinceChimera, s.getInqChance());
+        double chance = s.getInqChance();
+        String chanceStr = chance < 0 ? "N/A" : String.format("%.2f%%", chance);
+        return String.format("[Diana] Mobs since Inq: %d | Inqs since Chimera: %d | Inq rate: %s",
+                d.mobsSinceInq, d.inqsSinceChimera, chanceStr);
     }
 
     public static String getStickMessage() {
@@ -250,25 +228,31 @@ public class DianaTracker {
     public static String getDropsMessage() {
         DianaData d = DianaStats.getInstance().getData();
         return String.format(
-                "Drops — Feathers: %d | Souvenirs: %d | Crowns: %d | Shelmets: %d | Remedies: %d | Plushies: %d | Coins: %s",
+                "[Diana] Feathers: %d | Souvenirs: %d | Crowns: %d | Shelmets: %d | Remedies: %d | Plushies: %d | Coins: %s",
                 d.griffinFeathers, d.souvenirs, d.crownsOfGreed,
                 d.dwarfTurtleShelmets, d.antiqueRemedies, d.crochetTigerPlushies,
                 formatCoinsStatic(d.totalCoins));
+    }
+
+    public static String getHelpMessage() {
+        return "\u00a73[Diana Party Commands]\u00a7r\n"
+                + "\u00a7e!bph \u00a77- Your burrows per hour\n"
+                + "\u00a7e!inq \u00a77- Mobs/inqs since last inq + spawn rate\n"
+                + "\u00a7e!stick \u00a77- Minotaurs since Daedalus Stick\n"
+                + "\u00a7e!relic \u00a77- Champs since Minos Relic\n"
+                + "\u00a7e!drops \u00a77- All tracked burrow drops\n"
+                + "\u00a7e!help \u00a77- This message";
+    }
+
+
+    private long parseLong(String s) {
+        try { return Long.parseLong(s.replace(",", "")); }
+        catch (NumberFormatException e) { return 0L; }
     }
 
     private static String formatCoinsStatic(long coins) {
         if (coins >= 1_000_000) return String.format("%.2fM", coins / 1_000_000.0);
         if (coins >= 1_000)     return String.format("%.1fk", coins / 1_000.0);
         return String.valueOf(coins);
-    }
-
-    // Utility
-
-    private long parseLong(String s) {
-        try {
-            return Long.parseLong(s.replace(",", ""));
-        } catch (NumberFormatException e) {
-            return 0L;
-        }
     }
 }
