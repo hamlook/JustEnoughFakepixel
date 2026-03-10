@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -45,6 +44,10 @@ public class SearchBar {
     private static String searchText = "";
     private static String lastCalcInput = "";
     private static String lastCalcResult = null;
+
+    public static String getSearchText() {
+        return searchText;
+    }
 
     private static boolean isEnabled() {
         return JefConfig.feature != null
@@ -113,11 +116,8 @@ public class SearchBar {
         if (!(event.gui instanceof GuiInventory) && !(event.gui instanceof GuiChest)) return;
         if (searchBar == null) return;
 
-        GuiContainer gui = (GuiContainer) event.gui;
         String text = searchBar.getText();
-
         drawSearchBar(searchBar, text);
-        highlightMatchingSlots(gui, text);
     }
 
     private static String calcSuffix(String text) {
@@ -133,60 +133,6 @@ public class SearchBar {
         }
 
         return lastCalcResult == null ? null : "§e= §a" + lastCalcResult;
-    }
-
-
-
-
-    private static void highlightMatchingSlots(GuiContainer gui, String query) {
-        if (query == null || query.trim().isEmpty()) return;
-
-        String normalized = query.trim().toLowerCase(Locale.ROOT);
-        List<Slot> slots = gui.inventorySlots.inventorySlots;
-        int guiLeft = gui.guiLeft;
-        int guiTop = gui.guiTop;
-
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(0F, 0F, 200F);
-
-        GlStateManager.disableLighting();
-        GlStateManager.disableDepth();
-        GlStateManager.disableTexture2D();
-
-        for (Slot slot : slots) {
-            if (slot == null || !slot.getHasStack()) continue;
-            if (!matches(slot.getStack(), normalized)) continue;
-
-            int x = guiLeft + slot.xDisplayPosition;
-            int y = guiTop + slot.yDisplayPosition;
-
-            // Fixed old highlight color (semi-transparent red)
-            Gui.drawRect(x, y, x + 16, y + 16, 0x66FF0000);
-        }
-
-        GlStateManager.enableTexture2D();
-        GlStateManager.enableDepth();
-        GlStateManager.enableLighting();
-        GlStateManager.popMatrix();
-    }
-
-    private static boolean matches(ItemStack stack, String query) {
-        if (stack == null) return false;
-
-        String display = stack.getDisplayName();
-        if (display != null && stripCodes(display).toLowerCase(Locale.ROOT).contains(query))
-            return true;
-
-        List<String> tooltip = stack.getTooltip(MC.thePlayer, false);
-        if (tooltip != null) {
-            for (String line : tooltip) {
-                if (line != null &&
-                        stripCodes(line).toLowerCase(Locale.ROOT).contains(query))
-                    return true;
-            }
-        }
-
-        return false;
     }
 
     private static void drawSearchBar(GuiTextField field, String rawText) {

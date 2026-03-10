@@ -134,9 +134,21 @@ public class Config {
         public boolean skillXpDisplay = true;
 
         @Expose
-        @ConfigOption(name = "Enable Search Bar", desc = "Shows a search bar in supported GUIs")
+        @ConfigOption(name = "Search Bar", desc = "Search bar settings")
+        @ConfigEditorAccordion(id = 10)
+        public boolean searchBarAccordion = false;
+
+        @Expose
+        @ConfigOption(name = "Enable", desc = "Shows a search bar in supported GUIs")
         @ConfigEditorBoolean
+        @ConfigAccordionId(id = 10)
         public boolean searchBar = true;
+
+        @Expose
+        @ConfigOption(name = "Highlight Color", desc = "Color used to highlight matching items in the search results")
+        @ConfigEditorColour
+        @ConfigAccordionId(id = 10)
+        public String searchBarHighlightColor = "0:102:255:0:0";
 
         @Expose
         @ConfigOption(name = "No Swap Animation", desc = "Removes the item lowering animation when switching hotbar slots")
