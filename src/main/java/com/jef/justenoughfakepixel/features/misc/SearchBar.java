@@ -1,7 +1,6 @@
 package com.jef.justenoughfakepixel.features.misc;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
-import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -13,7 +12,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -46,6 +44,10 @@ public class SearchBar {
     private static String searchText = "";
     private static String lastCalcInput = "";
     private static String lastCalcResult = null;
+
+    public static String getSearchText() {
+        return searchText;
+    }
 
     private static boolean isEnabled() {
         return JefConfig.feature != null
@@ -131,48 +133,6 @@ public class SearchBar {
         }
 
         return lastCalcResult == null ? null : "§e= §a" + lastCalcResult;
-    }
-
-    public static void renderHighlightForItem(ItemStack itemStack, int x, int y) {
-       if (JefConfig.feature == null || !JefConfig.feature.misc.searchBar) return;
-        if (!(MC.currentScreen instanceof GuiContainer)) return;
-        if (searchText == null || searchText.trim().isEmpty()) return;
-        if (!matches(itemStack, searchText.trim().toLowerCase(Locale.ROOT))) return;
-
-        String colorStr = JefConfig.feature.misc.searchBarHighlightColor;
-        int highlightColor = ChromaColour.specialToChromaRGB(colorStr);
-
-        GlStateManager.disableLighting();
-        GlStateManager.disableDepth();
-        GlStateManager.disableTexture2D();
-        GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
-
-        Gui.drawRect(x, y, x + 16, y + 16, highlightColor);
-
-        GlStateManager.disableBlend();
-        GlStateManager.enableTexture2D();
-        GlStateManager.enableDepth();
-        GlStateManager.enableLighting();
-    }
-
-    private static boolean matches(ItemStack stack, String query) {
-        if (stack == null) return false;
-
-        String display = stack.getDisplayName();
-        if (display != null && stripCodes(display).toLowerCase(Locale.ROOT).contains(query))
-            return true;
-
-        List<String> tooltip = stack.getTooltip(MC.thePlayer, false);
-        if (tooltip != null) {
-            for (String line : tooltip) {
-                if (line != null &&
-                        stripCodes(line).toLowerCase(Locale.ROOT).contains(query))
-                    return true;
-            }
-        }
-
-        return false;
     }
 
     private static void drawSearchBar(GuiTextField field, String rawText) {
