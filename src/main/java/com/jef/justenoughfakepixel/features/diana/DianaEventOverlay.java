@@ -77,16 +77,16 @@ public class DianaEventOverlay {
         List<String> lines = new ArrayList<>();
 
         if (preview) {
-            lines.add("\u00a76\u00a7lDiana Event");
-            lines.add("\u00a77Total Mobs: \u00a7f165");
-            lines.add("\u00a77Playtime: \u00a7f2h 30m  \u00a77Session: \u00a7f45m");
+            lines.add("\u00a7e\u00a7lDiana Event");
+            lines.add("\u00a79Total Mobs: \u00a7f165");
+            lines.add("\u00a71Playtime: \u00a7f2h 30m  \u00a71Session: \u00a7f45m");
             lines.add("\u00a7eBurrows: \u00a7f42  \u00a77(\u00a7a120.0\u00a77/hr)");
-            lines.add("\u00a77Inquisitor \u00a7d4.20% \u00a7f(7) \u00a77[\u00a7bLS \u00a7f3\u00a77]");
-            lines.add("\u00a77Minotaur \u00a7d12.30% \u00a7f(45)");
-            lines.add("\u00a77Minos Champion \u00a7d8.10% \u00a7f(30)");
-            lines.add("\u00a77Gaia Construct \u00a7d5.00% \u00a7f(8)");
-            lines.add("\u00a77Minos Hunter \u00a7d20.00% \u00a7f(33)");
-            lines.add("\u00a77Siamese Lynx \u00a7d10.00% \u00a7f(17)");
+            lines.add("\u00a7dInquisitor \u00a7d4.20% \u00a7f(7) \u00a77[\u00a7bLS \u00a7f3\u00a77]");
+            lines.add("\u00a76Minotaur \u00a7d12.30% \u00a7f(45)");
+            lines.add("\u00a75Minos Champion \u00a7d8.10% \u00a7f(30)");
+            lines.add("\u00a7fGaia Construct \u00a7d5.00% \u00a7f(8)");
+            lines.add("\u00a7aMinos Hunter \u00a7d20.00% \u00a7f(33)");
+            lines.add("\u00a7eSiamese Lynx \u00a7d10.00% \u00a7f(17)");
             return lines;
         }
 
@@ -96,11 +96,11 @@ public class DianaEventOverlay {
         DianaData d   = stats.getData();
         double    bph = stats.getBph();
 
-        lines.add("\u00a76\u00a7lDiana Event");
+        lines.add("\u00a7e\u00a7lDiana Event");
 
-        lines.add(String.format("\u00a77Total Mobs: \u00a7f%d", d.totalMobs));
+        lines.add(String.format("\u00a79Total Mobs: \u00a7f%d", d.totalMobs));
 
-        lines.add(String.format("\u00a77Playtime: \u00a7f%s  \u00a77Session: \u00a7f%s",
+        lines.add(String.format("\u00a71Playtime: \u00a7f%s  \u00a71Session: \u00a7f%s",
                 DianaStats.formatTime(d.activeTimeMs),
                 DianaStats.formatTime(stats.getSessionTimeMs())));
 
@@ -113,37 +113,37 @@ public class DianaEventOverlay {
         String lsSuffix = d.totalInqsLootshared > 0
                 ? String.format("  \u00a77[\u00a7bLS \u00a7f%d\u00a77]", d.totalInqsLootshared)
                 : "";
-        lines.add(String.format("\u00a77Inquisitor \u00a7d%s \u00a7f(%d)%s",
+        lines.add(String.format("\u00a7dInquisitor \u00a7d%s \u00a7f(%d)%s",
                 inqPct, d.totalInqs, lsSuffix));
 
         String minoPct = d.totalMobs > 0
                 ? String.format("%.2f%%", stats.getMobPercent(d.totalMinotaurs))
                 : "-.--%%";
-        lines.add(String.format("\u00a77Minotaur \u00a7d%s \u00a7f(%d)",
+        lines.add(String.format("\u00a76Minotaur \u00a7d%s \u00a7f(%d)",
                 minoPct, d.totalMinotaurs));
 
         String champPct = d.totalMobs > 0
                 ? String.format("%.2f%%", stats.getMobPercent(d.totalChamps))
                 : "-.--%%";
-        lines.add(String.format("\u00a77Minos Champion \u00a7d%s \u00a7f(%d)",
+        lines.add(String.format("\u00a75Minos Champion \u00a7d%s \u00a7f(%d)",
                 champPct, d.totalChamps));
 
         String gaiaPct = d.totalMobs > 0
                 ? String.format("%.2f%%", stats.getMobPercent(d.totalGaiaConstructs))
                 : "-.--%%";
-        lines.add(String.format("\u00a77Gaia Construct \u00a7d%s \u00a7f(%d)",
+        lines.add(String.format("\u00a7fGaia Construct \u00a7d%s \u00a7f(%d)",
                 gaiaPct, d.totalGaiaConstructs));
 
         String hunterPct = d.totalMobs > 0
                 ? String.format("%.2f%%", stats.getMobPercent(d.totalMinosHunters))
                 : "-.--%%";
-        lines.add(String.format("\u00a77Minos Hunter \u00a7d%s \u00a7f(%d)",
+        lines.add(String.format("\u00a7aMinos Hunter \u00a7d%s \u00a7f(%d)",
                 hunterPct, d.totalMinosHunters));
 
         String lynxPct = d.totalMobs > 0
                 ? String.format("%.2f%%", stats.getMobPercent(d.totalSiameseLynxes))
                 : "-.--%%";
-        lines.add(String.format("\u00a77Siamese Lynx \u00a7d%s \u00a7f(%d)",
+        lines.add(String.format("\u00a7eSiamese Lynx \u00a7d%s \u00a7f(%d)",
                 lynxPct, d.totalSiameseLynxes));
 
         return lines;

@@ -79,12 +79,12 @@ public class DianaLootOverlay {
         if (preview) {
             lines.add("\u00a76\u00a7lDiana Loot");
             lines.add("\u00a77Inqs since Chimera: \u00a7f4  \u00a77[\u00a7bLS \u00a7f3\u00a77]");
-            lines.add("\u00a75Chimeras: \u00a7f1");
+            lines.add("\u00a7dChimeras: \u00a7f1");
             lines.add("\u00a71Feathers: \u00a7f5");
-            lines.add("\u00a7aShelmets: \u00a7f2  \u00a7aRemedies: \u00a7f1  \u00a7aPlushies: \u00a7f0");
-            lines.add("\u00a76Sticks: \u00a7f2  \u00a77(since last: \u00a7f12\u00a77)");
-            lines.add("\u00a75Relics: \u00a7f1  \u00a77(since last: \u00a7f30\u00a77)");
-            lines.add("\u00a76Souvenirs: \u00a7f2  \u00a76Crowns: \u00a7f1");
+            lines.add("\u00a72Shelmets: \u00a7f2  \u00a75Remedies: \u00a7f1  \u00a75Plushies: \u00a7f0");
+            lines.add("\u00a76Daedalus Sticks: \u00a7f2  \u00a77(since last: \u00a7f12\u00a77)");
+            lines.add("\u00a75Minos Relics: \u00a7f1  \u00a77(since last: \u00a7f30\u00a77)");
+            lines.add("\u00a75Souvenirs: \u00a7f2  \u00a76Crowns: \u00a7f1");
             lines.add("\u00a76Coins: \u00a7f1.2M");
             return lines;
         }
@@ -102,20 +102,20 @@ public class DianaLootOverlay {
         lines.add(String.format("\u00a77Inqs since Chimera: \u00a7f%d%s",
                 d.inqsSinceChimera, lsSuffix));
 
-        lines.add(String.format("\u00a75Chimeras: \u00a7f%d", d.totalChimeras));
+        lines.add(String.format("\u00a7dChimeras: \u00a7f%d", d.totalChimeras));
 
         lines.add(String.format("\u00a71Feathers: \u00a7f%d", d.griffinFeathers));
 
-        lines.add(String.format("\u00a7aShelmets: \u00a7f%d  \u00a7aRemedies: \u00a7f%d  \u00a7aPlushies: \u00a7f%d",
+        lines.add(String.format("\u00a72Shelmets: \u00a7f%d  \u00a75Remedies: \u00a7f%d  \u00a75Plushies: \u00a7f%d",
                 d.dwarfTurtleShelmets, d.antiqueRemedies, d.crochetTigerPlushies));
 
-        lines.add(String.format("\u00a76Sticks: \u00a7f%d  \u00a77(since last: \u00a7f%d\u00a77)",
+        lines.add(String.format("\u00a76Daedalus Sticks: \u00a7f%d  \u00a77(since last: \u00a7f%d\u00a77)",
                 d.totalSticks, d.minotaursSinceStick));
 
-        lines.add(String.format("\u00a75Relics: \u00a7f%d  \u00a77(since last: \u00a7f%d\u00a77)",
+        lines.add(String.format("\u00a75Minos Relics: \u00a7f%d  \u00a77(since last: \u00a7f%d\u00a77)",
                 d.totalRelics, d.champsSinceRelic));
 
-        lines.add(String.format("\u00a76Souvenirs: \u00a7f%d  \u00a76Crowns: \u00a7f%d",
+        lines.add(String.format("\u00a75Souvenirs: \u00a7f%d  \u00a76Crowns: \u00a7f%d",
                 d.souvenirs, d.crownsOfGreed));
         lines.add(String.format("\u00a76Coins: \u00a7f%s", DianaStats.fmtCoins(d.totalCoins)));
 
