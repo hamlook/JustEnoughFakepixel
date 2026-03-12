@@ -50,7 +50,7 @@ public class PartyCommands {
         //Diana commands
         switch (body) {
 
-            case "!borrows":
+            case "!burrows":
                 respond(DianaTracker.getBorrowsMessage());
                 break;
 
