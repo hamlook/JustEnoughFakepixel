@@ -9,6 +9,7 @@ import com.jef.justenoughfakepixel.utils.TablistParser;
 import com.jef.justenoughfakepixel.features.general.DamageSplashes;
 import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
 import com.jef.justenoughfakepixel.features.scoreboard.BankParser;
+import com.jef.justenoughfakepixel.features.scoreboard.MaxwellPowerSync;
 import com.jef.justenoughfakepixel.features.general.SkyblockIdTooltip;
 import com.jef.justenoughfakepixel.features.general.CursorResetHandler;
 import com.jef.justenoughfakepixel.features.misc.BrewingStandHelper;
@@ -65,6 +66,7 @@ public class JefMod {
 
         WaypointStorage.getInstance().initFile(JefConfig.configDirectory);
         DianaStats.getInstance().initFile(JefConfig.configDirectory);
+        MaxwellPowerSync.getInstance().initFile(JefConfig.configDirectory);
     }
 
     @Mod.EventHandler
@@ -72,6 +74,8 @@ public class JefMod {
         JefConfig.register();
         WaypointStorage.getInstance().load();
         DianaStats.getInstance().load();
+        MaxwellPowerSync.getInstance().load();
+
         MinecraftForge.EVENT_BUS.register(this);
 
         MinecraftForge.EVENT_BUS.register(new SearchBar());
@@ -80,6 +84,7 @@ public class JefMod {
         MinecraftForge.EVENT_BUS.register(new DungeonStats());
         MinecraftForge.EVENT_BUS.register(new CustomScoreboard());
         MinecraftForge.EVENT_BUS.register(new BankParser());
+        MinecraftForge.EVENT_BUS.register(MaxwellPowerSync.getInstance());
         MinecraftForge.EVENT_BUS.register(new PartyCommands());
         MinecraftForge.EVENT_BUS.register(new TablistParser());
         MinecraftForge.EVENT_BUS.register(new FetchurOverlay());

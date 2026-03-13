@@ -3,7 +3,6 @@ package com.jef.justenoughfakepixel.features.scoreboard;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
-import com.jef.justenoughfakepixel.utils.OverlayUtils;
 import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -16,17 +15,72 @@ import org.lwjgl.opengl.GL11;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class CustomScoreboard extends JefOverlay {
 
     // ── Layout ────────────────────────────────────────────────────────────────
-    private static final int PAD_X      = 4;
-    private static final int PAD_Y      = 4;
-    private static final int LINE_GAP   = 1;
+    private static final int PAD_X       = 4;
+    private static final int PAD_Y       = 4;
+    private static final int LINE_GAP    = 1;
     private static final int SUPERSAMPLE = 2;
 
     // ── Colours ───────────────────────────────────────────────────────────────
     private static final int TITLE_COL = 0xFFFFAA00;
+
+    // ── Line IDs — must match exampleText order in Scoreboard.java ────────────
+    private static final int LINE_SERVER   = 0; // 03/13/26 hub-2
+    private static final int LINE_SEASON   = 1; // Winter 13th
+    private static final int LINE_TIME     = 2; // 9:30am ☀
+    private static final int LINE_LOCATION = 3; // ⏣ Village
+    private static final int LINE_PURSE    = 4;
+    private static final int LINE_BANK     = 5;
+    private static final int LINE_BITS     = 6;
+    private static final int LINE_POWER    = 7;
+    private static final int LINE_WEBSITE  = 8;
+
+    // ── Patterns (ported from SkyHanni ScoreboardPattern + PurseApi + BitsApi) ─
+    // Location: raw line contains ⏣ (normal) or ф (Rift)
+    // SkyHanni: \s*(?<location>(?:§7⏣|§5ф) .*)
+    private static final String LOC_SYMBOL_NORMAL = "\u23E3"; // ⏣
+    private static final String LOC_SYMBOL_RIFT   = "\u0444"; // ф
+
+    // Date/season: SkyHanni: \s*(?:(?:Late|Early) )?(?:Spring|Summer|Autumn|Winter) \d+(?:st|nd|rd|th)?.*
+    private static final Pattern SEASON_PATTERN = Pattern.compile(
+            "\\s*(?:(?:Late|Early) )?(?:Spring|Summer|Autumn|Winter) \\d+.*"
+    );
+
+    // Time: SkyHanni: \s*§7\d+:\d+(?:am|pm)\s*(?:§b☽|§e☀|§.⚡|§.☔)?.*
+    // We match on stripped: digits:digits followed by am/pm
+    private static final Pattern TIME_PATTERN = Pattern.compile(
+            "\\s*\\d+:\\d+(?:am|pm).*"
+    );
+
+    // Server/lobby code: SkyHanni: \s*§.(\d{2}/?){3} §8(?<code>.*)
+    // Stripped it looks like: 03/13/26 hub-2
+    private static final Pattern SERVER_PATTERN = Pattern.compile(
+            "\\s*\\d{2}/\\d{2}/\\d{2}.*"
+    );
+
+    // Purse: SkyHanni: (?:§.)*(?:Piggy|Purse): §6(?<coins>[\d,.]+).*
+    private static final Pattern PURSE_PATTERN = Pattern.compile(
+            "(?:Piggy|Purse): [\\d,.]+"
+    );
+
+    // Bits: SkyHanni: ^Bits: §b(?<amount>[\d,.]+).*$
+    private static final Pattern BITS_PATTERN = Pattern.compile(
+            "Bits: [\\d,.]+"
+    );
+
+    // Bank: starts with Bank:
+    private static final Pattern BANK_PATTERN = Pattern.compile(
+            "Bank: .+"
+    );
+
+    // Website: contains fakepixel
+    private static final Pattern WEBSITE_PATTERN = Pattern.compile(
+            ".*fakepixel.*"
+    );
 
     // ── Singleton ─────────────────────────────────────────────────────────────
     private static CustomScoreboard instance;
@@ -54,8 +108,21 @@ public class CustomScoreboard extends JefOverlay {
     @SubscribeEvent
     public void onRenderPost(RenderGameOverlayEvent.Post event) {
         if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
-        if (OverlayUtils.shouldHide()) return;
+        // Hide on F3 debug screen but NOT when tab is held — scoreboard stays visible over tab list
+        if (Minecraft.getMinecraft().gameSettings.showDebugInfo) return;
         render(false);
+    }
+
+    // ── Safe line order ───────────────────────────────────────────────────────
+    // Gson deserializes List<Integer> as List<Double> from JSON, cast via Number.
+    private static List<Integer> getLineOrder() {
+        List<?> raw = JefConfig.feature.scoreboard.scoreboardLines;
+        List<Integer> result = new ArrayList<>();
+        if (raw == null) return result;
+        for (Object o : raw) {
+            if (o instanceof Number) result.add(((Number) o).intValue());
+        }
+        return result;
     }
 
     // ── Lines ─────────────────────────────────────────────────────────────────
@@ -65,47 +132,125 @@ public class CustomScoreboard extends JefOverlay {
         List<String> lines = new ArrayList<>();
 
         if (preview) {
-            lines.add("\u00A76\u00A7l SKYBLOCK ");
-            lines.add("\u00A7fLate Autumn 31st \u00A7b5:30am");
-            lines.add(" \u00A77www.fakepixel.me");
-            lines.add("\u00A7fPurse: \u00A76822,022");
-            lines.add("\u00A7fBank: \u00A761,204,802");
-            lines.add("\u00A7fBits: \u00A7b6,039,340");
-            lines.add("\u00A7eActive Quest");
-            lines.add("\u00A7cKill 500 Zombies");
-            lines.add("\u00A77(327/500) Progress");
-            return lines;
+            // Use live lines in preview so position editor shows real scoreboard
+            return getLines(false);
         }
 
+        // ── Pull live sidebar ─────────────────────────────────────────────────
         List<String> raw = new ArrayList<>(ScoreboardUtils.getScoreboardLines());
         if (raw.isEmpty()) return lines;
         Collections.reverse(raw);
 
+        // ── Classify each sidebar line ────────────────────────────────────────
+        String serverRaw   = null;
+        String seasonRaw   = null;
+        String timeRaw     = null;
+        String locationRaw = null;
+        String purseRaw    = null;
+        String bankRaw     = null;
+        String bitsRaw     = null;
+        String websiteRaw  = null;
+
+        // Track which raw lines have been claimed so they don't appear twice
+        List<String> claimed = new ArrayList<>();
+
+        for (String l : raw) {
+            String c = stripColor(l).trim();
+            if (c.isEmpty()) continue;
+
+            // Location — check RAW line for ⏣ (Hypixel), or ф (Rift)
+            // Must check raw (not stripped) because symbol may be color-prefixed
+            if (locationRaw == null && (l.contains(LOC_SYMBOL_NORMAL) || l.contains(LOC_SYMBOL_RIFT))) {
+                locationRaw = l; claimed.add(l); continue;
+            }
+            // Server/date line: matches dd/mm/yy pattern
+            if (serverRaw == null && SERVER_PATTERN.matcher(c).matches()) {
+                serverRaw = l; claimed.add(l); continue;
+            }
+            // Season/day: Spring/Summer/Autumn/Winter + number
+            if (seasonRaw == null && SEASON_PATTERN.matcher(c).matches()) {
+                seasonRaw = l; claimed.add(l); continue;
+            }
+            // Time: digits:digits + am/pm
+            if (timeRaw == null && TIME_PATTERN.matcher(c).matches()) {
+                timeRaw = l; claimed.add(l); continue;
+            }
+            // Purse / Piggy
+            if (purseRaw == null && PURSE_PATTERN.matcher(c).find()) {
+                purseRaw = l; claimed.add(l); continue;
+            }
+            // Bank
+            if (bankRaw == null && BANK_PATTERN.matcher(c).find()) {
+                bankRaw = l; claimed.add(l); continue;
+            }
+            // Bits
+            if (bitsRaw == null && BITS_PATTERN.matcher(c).find()) {
+                bitsRaw = l; claimed.add(l); continue;
+            }
+            // Website
+            if (websiteRaw == null && WEBSITE_PATTERN.matcher(c).matches()) {
+                websiteRaw = l; claimed.add(l);
+            }
+        }
+
+        // ── Title ─────────────────────────────────────────────────────────────
         String title = ScoreboardUtils.getServerId();
         if (title == null || title.trim().isEmpty()) title = "SKYBLOCK";
         lines.add("\u00A76\u00A7l" + title.trim());
 
-        boolean hasPurse = false, hasBank = false;
-        for (String l : raw) {
-            String c = stripColor(l).trim();
-            if (c.startsWith("Purse:") || c.startsWith("Piggy:")) hasPurse = true;
-            if (c.startsWith("Bank:")) hasBank = true;
+        // ── Config-ordered known lines ────────────────────────────────────────
+        for (int id : getLineOrder()) {
+            switch (id) {
+                case LINE_SERVER:
+                    if (serverRaw != null) lines.add(serverRaw);
+                    break;
+                case LINE_SEASON:
+                    if (seasonRaw != null) lines.add(seasonRaw);
+                    break;
+                case LINE_TIME:
+                    if (timeRaw != null) lines.add(timeRaw);
+                    break;
+                case LINE_LOCATION:
+                    if (locationRaw != null) lines.add(locationRaw);
+                    break;
+                case LINE_PURSE:
+                    if (purseRaw != null) lines.add(purseRaw);
+                    break;
+                case LINE_BANK:
+                    if (bankRaw != null) {
+                        lines.add(bankRaw);
+                    } else {
+                        String bank = BankParser.getBank();
+                        if (bank != null) lines.add("\u00A7fBank: \u00A76" + bank);
+                    }
+                    break;
+                case LINE_BITS:
+                    if (bitsRaw != null) lines.add(bitsRaw);
+                    break;
+                case LINE_POWER:
+                    String power = MaxwellPowerSync.getPower();
+                    if (power != null && ScoreboardUtils.isOnSkyblock()) {
+                        lines.add("\u00A7fPower: \u00A7d" + power);
+                    }
+                    break;
+                case LINE_WEBSITE:
+                    // handled after unclaimed lines — always at bottom
+                    break;
+            }
         }
 
+        // ── Unclaimed lines (quests, events, dungeons, etc.) ─────────────────
         for (String l : raw) {
+            if (claimed.contains(l)) continue;
             String c = stripColor(l).trim();
-            if (c.startsWith("Bank:")) continue;
+            if (c.isEmpty()) continue;
             lines.add(l);
-            if (hasPurse && (c.startsWith("Purse:") || c.startsWith("Piggy:"))) {
-                if (hasBank) {
-                    for (String bl : raw) {
-                        if (stripColor(bl).trim().startsWith("Bank:")) { lines.add(bl); break; }
-                    }
-                } else {
-                    String bank = BankParser.getBank();
-                    if (bank != null) lines.add("\u00A7fBank: \u00A76" + bank);
-                }
-            }
+        }
+
+        // ── Website always last ───────────────────────────────────────────────
+        // Only add if LINE_WEBSITE is in the config order (player hasn't removed it)
+        if (websiteRaw != null && getLineOrder().contains(LINE_WEBSITE)) {
+            lines.add(websiteRaw);
         }
 
         return lines;
@@ -116,7 +261,7 @@ public class CustomScoreboard extends JefOverlay {
     @Override
     public void render(boolean preview) {
         if (JefConfig.feature == null) return;
-        if (!preview && (!extraGuard() || OverlayUtils.shouldHide())) return;
+        if (!preview && (!extraGuard() || Minecraft.getMinecraft().gameSettings.showDebugInfo)) return;
 
         List<String> lines = getLines(preview);
         if (lines.isEmpty()) return;
@@ -150,7 +295,7 @@ public class CustomScoreboard extends JefOverlay {
         GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
 
         int bgAlpha = (int)(JefConfig.feature.scoreboard.opacity / 100f * 255f);
-        int r = (int) JefConfig.feature.scoreboard.cornerRadius * ss;
+        int r       = (int) JefConfig.feature.scoreboard.cornerRadius * ss;
         drawRoundedRect(0, 0, boxW * ss, boxH * ss, r, (bgAlpha << 24) | 0x101010);
 
         GL11.glScalef(ss, ss, 1f);
@@ -175,9 +320,9 @@ public class CustomScoreboard extends JefOverlay {
     private static void drawRoundedRect(int x, int y, int w, int h, int r, int color) {
         r = Math.min(r, Math.min(w, h) / 2);
 
-        Gui.drawRect(x + r, y,       x + w - r, y + h,     color);
-        Gui.drawRect(x,     y + r,   x + r,     y + h - r, color);
-        Gui.drawRect(x + w - r, y + r, x + w,   y + h - r, color);
+        Gui.drawRect(x + r, y,           x + w - r, y + h,     color);
+        Gui.drawRect(x,     y + r,       x + r,     y + h - r, color);
+        Gui.drawRect(x + w - r, y + r,   x + w,     y + h - r, color);
 
         for (int i = 0; i < r; i++) {
             int cut = (int) Math.round(r - Math.sqrt(Math.max(0.0, (double) r * r - (double)(r - i - 1) * (r - i - 1))));
