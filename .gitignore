@@ -4,3 +4,5 @@ run/
 build/
 .gradle/
 
+gradle.properties
+settings.gradle.kts
