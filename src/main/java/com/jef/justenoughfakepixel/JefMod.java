@@ -23,6 +23,7 @@ import com.jef.justenoughfakepixel.features.waypoints.WaypointStorage;
 import com.jef.justenoughfakepixel.features.diana.DianaCommand;
 import com.jef.justenoughfakepixel.features.diana.DianaEventOverlay;
 import com.jef.justenoughfakepixel.features.diana.DianaLootOverlay;
+import com.jef.justenoughfakepixel.features.diana.DianaMobHealthOverlay;
 import com.jef.justenoughfakepixel.features.diana.InqHealthOverlay;
 import com.jef.justenoughfakepixel.features.diana.DianaMobDetect;
 import com.jef.justenoughfakepixel.features.diana.DianaStats;
@@ -100,6 +101,7 @@ public class JefMod {
         MinecraftForge.EVENT_BUS.register(new DianaEventOverlay());
         MinecraftForge.EVENT_BUS.register(new DianaLootOverlay());
         MinecraftForge.EVENT_BUS.register(new InqHealthOverlay());
+        MinecraftForge.EVENT_BUS.register(new DianaMobHealthOverlay());
         ClientCommandHandler.instance.registerCommand(new DianaCommand());
         ClientCommandHandler.instance.registerCommand(new WaypointCommand());
     }

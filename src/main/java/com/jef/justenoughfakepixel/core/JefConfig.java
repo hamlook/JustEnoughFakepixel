@@ -7,9 +7,8 @@ import com.jef.justenoughfakepixel.core.config.gui.GuiScreenElementWrapper;
 import com.jef.justenoughfakepixel.core.config.command.JefCommand;
 import com.jef.justenoughfakepixel.core.config.editors.GuiPositionEditor;
 import com.jef.justenoughfakepixel.features.misc.SearchBar;
-import com.jef.justenoughfakepixel.features.diana.DianaLootOverlay;
-import com.jef.justenoughfakepixel.features.diana.InqHealthOverlay;
 import com.jef.justenoughfakepixel.features.diana.DianaEventOverlay;
+import com.jef.justenoughfakepixel.features.diana.GuiDianaOverlayEditor;
 import com.jef.justenoughfakepixel.features.mining.FetchurOverlay;
 import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
 import com.jef.justenoughfakepixel.features.misc.PerformanceHUD;
@@ -162,46 +161,12 @@ public class JefConfig {
                 .withParent(Minecraft.getMinecraft().currentScreen);
     }
 
-    public static void openInqHealthEditor() {
+    public static void openDianaOverlayEditor() {
         if (feature == null) return;
-        InqHealthOverlay overlay = InqHealthOverlay.getInstance();
-        screenToOpen = new GuiPositionEditor(
-                feature.diana.inqHealthPos,
-                overlay::getOverlayWidth,
-                overlay::getOverlayHeight,
-                () -> overlay.render(true),
-                JefConfig::saveConfig,
+        screenToOpen = new GuiDianaOverlayEditor(
+                Minecraft.getMinecraft().currentScreen,
                 JefConfig::saveConfig
-        ).withOverlayScale(feature.diana.overlayScale)
-                .withParent(Minecraft.getMinecraft().currentScreen);
-    }
-
-    public static void openDianaEventEditor() {
-        if (feature == null) return;
-        DianaEventOverlay overlay = DianaEventOverlay.getInstance();
-        screenToOpen = new GuiPositionEditor(
-                feature.diana.eventOverlayPos,
-                overlay::getOverlayWidth,
-                overlay::getOverlayHeight,
-                () -> overlay.render(true),
-                JefConfig::saveConfig,
-                JefConfig::saveConfig
-        ).withOverlayScale(feature.diana.overlayScale)
-                .withParent(Minecraft.getMinecraft().currentScreen);
-    }
-
-    public static void openDianaLootEditor() {
-        if (feature == null) return;
-        DianaLootOverlay overlay = DianaLootOverlay.getInstance();
-        screenToOpen = new GuiPositionEditor(
-                feature.diana.lootOverlayPos,
-                overlay::getOverlayWidth,
-                overlay::getOverlayHeight,
-                () -> overlay.render(true),
-                JefConfig::saveConfig,
-                JefConfig::saveConfig
-        ).withOverlayScale(feature.diana.overlayScale)
-                .withParent(Minecraft.getMinecraft().currentScreen);
+        );
     }
 
     public static void openScoreboardEditor() {
