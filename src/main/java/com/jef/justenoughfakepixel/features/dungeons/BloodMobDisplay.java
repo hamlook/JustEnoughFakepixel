@@ -26,12 +26,10 @@ import java.util.regex.Pattern;
 
 public class BloodMobDisplay {
 
-    // Matches armor stand name only if it contains a blood room mob name.
-    // Optional modifier prefix (Healthy, Stormy, etc.) is allowed but the mob name must be present.
+    // Matches armor stand name only if it contains a blood room mob name
     private static final Pattern MOB_NAME = Pattern.compile(
             ".*(?:Putrid|Reaper|Vader|Frost|Cannibal|Revoker|Tear|Mr\\.? Dead|Skull|Walker|Psycho|Ooze|Freak|Flamer|Mute|Leech|Parasite).*"
     );
-    // Dying health bar — skip these
     private static final Pattern DYING1 = Pattern.compile(
             "^§.\\[§.Lv\\d+§.\\] §.+ (?:§.)+0§f/.+§c❤$"
     );

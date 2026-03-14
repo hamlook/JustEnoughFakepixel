@@ -10,10 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * /diana reset  — resets all Diana tracking counters
- * /diana toggle — pauses/resumes tracking
- */
+
 public class DianaCommand extends SimpleCommand {
 
     private static final String PREFIX = EnumChatFormatting.DARK_AQUA + "[Diana] " + EnumChatFormatting.RESET;
