@@ -24,6 +24,10 @@ A Quality-of-life mod made for fakepixel skyblock.
 * Show own nametag
 * Disable entity fire
 
+## Custom Scoreboard
+* Scoreboard additions like Banking data , Power Selected
+* Scoreboard opacity , rounded edges , position control
+  
 ## Waypoints
 * Ordered waypoints
 
