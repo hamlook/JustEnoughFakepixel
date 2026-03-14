@@ -13,8 +13,10 @@ A Quality-of-life mod made for fakepixel skyblock.
 
 ## Diana
 * Diana Tracker
+* Diana mob health overlay
 * Party commands for diana
- !help
+  !help
+
 
 ## Misc
 * Item Stack Utils
