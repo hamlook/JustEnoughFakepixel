@@ -65,7 +65,7 @@ public class DianaTracker {
     @SubscribeEvent
     public void onChat(ClientChatReceivedEvent event) {
         if (mc.thePlayer == null) return;
-        String msg = StringUtils.stripControlCodes(event.message.getUnformattedText());
+        String msg = StringUtils.stripControlCodes(event.message.getFormattedText());
         DianaStats stats = DianaStats.getInstance();
 
         if (LOOT_SHARE.matcher(msg).find()) {
@@ -79,6 +79,7 @@ public class DianaTracker {
 
         handleBorrowDrops(msg, stats);
         handleRareMobDrops(msg, stats);
+        handleMobSpawnHP(msg);
 
         if (!stats.isTracking()) return;
 
@@ -92,6 +93,22 @@ public class DianaTracker {
         stats.updateActivity();
         stats.getData().totalBorrows++;
         stats.save();
+    }
+
+    /** Called outside isTracking() guard so HP overlay fires even when spade is swapped out */
+    private void handleMobSpawnHP(String msg) {
+        Matcher m = MOB_SPAWN.matcher(msg);
+        if (!m.find()) return;
+        String mobName = m.group(1).trim();
+        switch (mobName) {
+            case "Minotaur":
+            case "Minos Champion":
+            case "Minos Hunter":
+            case "Gaia Construct":
+            case "Siamese Lynxes":
+                DianaMobDetect.onNonInqMobDug();
+                break;
+        }
     }
 
     private void handleMobSpawn(String msg, DianaStats stats) {
@@ -113,23 +130,28 @@ public class DianaTracker {
                 d.mobsSinceInq++;
                 d.minotaursSinceStick++;
                 d.totalMinotaurs++;
+                DianaMobDetect.onNonInqMobDug();
                 break;
             case "Minos Champion":
                 d.mobsSinceInq++;
                 d.champsSinceRelic++;
                 d.totalChamps++;
+                DianaMobDetect.onNonInqMobDug();
                 break;
             case "Gaia Construct":
                 d.mobsSinceInq++;
                 d.totalGaiaConstructs++;
+                DianaMobDetect.onNonInqMobDug();
                 break;
             case "Minos Hunter":
                 d.mobsSinceInq++;
                 d.totalMinosHunters++;
+                DianaMobDetect.onNonInqMobDug();
                 break;
             case "Siamese Lynxes":
                 d.mobsSinceInq++;
                 d.totalSiameseLynxes++;
+                DianaMobDetect.onNonInqMobDug();
                 break;
             default:
                 d.mobsSinceInq++;
