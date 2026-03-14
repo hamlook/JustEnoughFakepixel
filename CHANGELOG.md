@@ -16,6 +16,6 @@
 * Better config for all overlay backgrounds
 * search bar pos is now configurable
 * Inquisitor and diana mob health overlays
-* 
+
 
 
