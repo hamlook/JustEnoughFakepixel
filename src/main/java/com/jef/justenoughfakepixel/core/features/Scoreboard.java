@@ -40,6 +40,12 @@ public class Scoreboard {
     public float scale = 1.0f;
 
     @Expose
+    @ConfigOption(name = "Hide when Tab held", desc = "Hide the scoreboard when the tab key is held")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 20)
+    public boolean hideOnTab = true;
+
+    @Expose
     @ConfigOption(name = "Edit Position", desc = "Drag to reposition the scoreboard")
     @ConfigEditorButton(runnableId = "openScoreboardEditor", buttonText = "Edit")
     @ConfigAccordionId(id = 20)
