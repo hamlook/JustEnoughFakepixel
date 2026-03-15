@@ -27,8 +27,6 @@ public class CustomScoreboard extends JefOverlay {
 
     private static final int TITLE_COL = 0xFFFFAA00;
 
-    // IDs assigned in the desired default display order:
-    // Server, Season, Time, ProfileType, Island, Location, SEP, Purse, Bank, Bits, Gems, SEP, Event, Cookie, Power, SEP, Fetchur, Slayer
     private static final int LINE_SERVER       = 0;
     private static final int LINE_SEASON       = 1;
     private static final int LINE_TIME         = 2;
@@ -75,9 +73,8 @@ public class CustomScoreboard extends JefOverlay {
             Pattern.compile("(?:Fishing Festival|Mining Fiesta|Spooky Festival|Season of Jerry|Traveling Zoo|New Year Celebration|Election|Fallen Star|Festival of Gifts).*");
     private static final Pattern SLAYER_PATTERN =
             Pattern.compile("Slayer Quest");
-    // Suppress cookie lines from scoreboard passthrough — display comes from tablist
     private static final Pattern COOKIE_SUPPRESS_PATTERN =
-            Pattern.compile("Cookie Buff: .*|\\d+d\\s+\\d+h.*");
+            Pattern.compile("Cookie Buff.*|\\d+d\\s+\\d+h.*");
     private static final Pattern WEBSITE_PATTERN =
             Pattern.compile(".*fakepixel.*");
 
@@ -128,6 +125,7 @@ public class CustomScoreboard extends JefOverlay {
         }
         return result.toString().trim();
     }
+
     @Override
     public List<String> getLines(boolean preview) {
 
@@ -146,8 +144,8 @@ public class CustomScoreboard extends JefOverlay {
         String bankRaw        = null;
         String bitsRaw        = null;
         String profileTypeRaw = null;
-        String eventRaw       = null;
         String websiteRaw     = null;
+        List<String> eventLines  = new ArrayList<>();
         List<String> slayerLines = new ArrayList<>();
 
         List<String> claimed = new ArrayList<>();
@@ -184,8 +182,14 @@ public class CustomScoreboard extends JefOverlay {
             if (profileTypeRaw == null && PROFILE_TYPE_PATTERN.matcher(c).find()) {
                 profileTypeRaw = l; claimed.add(l); continue;
             }
-            if (eventRaw == null && EVENT_PATTERN.matcher(c).find()) {
-                eventRaw = l; claimed.add(l); continue;
+            if (EVENT_PATTERN.matcher(c).find()) {
+                eventLines.add(l); claimed.add(l);
+                if (li + 1 < raw.size()) {
+                    String next = raw.get(li + 1);
+                    String nc = stripColor(next).trim();
+                    if (!nc.isEmpty()) { eventLines.add(next); claimed.add(next); li++; }
+                }
+                continue;
             }
             if (slayerLines.isEmpty() && SLAYER_PATTERN.matcher(c).find()) {
                 claimed.add(l);
@@ -226,6 +230,23 @@ public class CustomScoreboard extends JefOverlay {
                     if (timeRaw != null) lines.add(timeRaw);
                     break;
 
+                case LINE_PROFILE_TYPE:
+                    if (profileTypeRaw != null) lines.add(profileTypeRaw);
+                    break;
+
+                case LINE_ISLAND:
+                    ScoreboardUtils.Location loc = ScoreboardUtils.getCurrentLocation();
+                    if (loc != ScoreboardUtils.Location.NONE) {
+                        String name;
+                        if (loc == ScoreboardUtils.Location.CRIMSON_ISLE) {
+                            name = "Crimson Isles";
+                        } else {
+                            name = toTitleCase(loc.name());
+                        }
+                        lines.add("\u32D6 \u00A7b" + name);
+                    }
+                    break;
+
                 case LINE_LOCATION:
                     if (locationRaw != null) lines.add(locationRaw);
                     break;
@@ -248,19 +269,23 @@ public class CustomScoreboard extends JefOverlay {
                 case LINE_BITS:
                     if (bitsRaw != null) lines.add(bitsRaw);
                     break;
-                case LINE_ISLAND:
-                    ScoreboardUtils.Location loc = ScoreboardUtils.getCurrentLocation();
-                    if (loc != ScoreboardUtils.Location.NONE) {
 
-                        String name;
+                case LINE_GEMS:
+                    if (!inDungeon) {
+                        String gems = TablistParser.readGems();
+                        if (gems != null) lines.add("\u00A7fGems: \u00A7a" + gems);
+                    }
+                    break;
 
-                        if (loc == ScoreboardUtils.Location.CRIMSON_ISLE) {
-                            name = "Crimson Isles";
-                        } else {
-                            name = toTitleCase(loc.name());
-                        }
+                case LINE_EVENT:
+                    lines.addAll(eventLines);
+                    break;
 
-                        lines.add("\u32D6 \u00A7b" + name);
+                case LINE_COOKIE:
+                    if (!inDungeon) {
+                        String cookie = TablistParser.readCookieBuff();
+                        if (cookie != null)
+                            lines.add("\u00A7dCookie Buff: \u00A7f" + cookie);
                     }
                     break;
 
@@ -280,29 +305,6 @@ public class CustomScoreboard extends JefOverlay {
                         lines.addAll(slayerLines);
                     break;
 
-                case LINE_GEMS:
-                    if (!inDungeon) {
-                        String gems = TablistParser.readGems();
-                        if (gems != null) lines.add("\u00A7fGems: \u00A7a" + gems);
-                    }
-                    break;
-
-                case LINE_PROFILE_TYPE:
-                    if (profileTypeRaw != null) lines.add(profileTypeRaw);
-                    break;
-
-                case LINE_EVENT:
-                    if (eventRaw != null) lines.add(eventRaw);
-                    break;
-
-                case LINE_COOKIE:
-                    if (!inDungeon) {
-                        String cookie = TablistParser.readCookieBuff();
-                        if (cookie != null)
-                            lines.add("\u00A7dCookie Buff: \u00A7f" + cookie);
-                    }
-                    break;
-
                 case LINE_EMPTY1:
                 case LINE_EMPTY2:
                 case LINE_EMPTY3:
@@ -310,9 +312,7 @@ public class CustomScoreboard extends JefOverlay {
                 case LINE_EMPTY5:
                 case LINE_EMPTY6:
                 case LINE_EMPTY7:
-                    if (ScoreboardUtils.isOnSkyblock() && !ScoreboardUtils.isInDungeon()) {
-                        lines.add("");
-                    }
+                    lines.add("");
                     break;
             }
         }
