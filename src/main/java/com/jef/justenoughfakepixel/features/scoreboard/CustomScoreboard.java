@@ -27,28 +27,30 @@ public class CustomScoreboard extends JefOverlay {
 
     private static final int TITLE_COL = 0xFFFFAA00;
 
+    // IDs assigned in the desired default display order:
+    // Server, Season, Time, ProfileType, Island, Location, SEP, Purse, Bank, Bits, Gems, SEP, Event, Cookie, Power, SEP, Fetchur, Slayer
     private static final int LINE_SERVER       = 0;
     private static final int LINE_SEASON       = 1;
     private static final int LINE_TIME         = 2;
-    private static final int LINE_LOCATION     = 3;
-    private static final int LINE_PURSE        = 4;
-    private static final int LINE_BANK         = 5;
-    private static final int LINE_BITS         = 6;
-    private static final int LINE_POWER        = 7;
-    private static final int LINE_FETCHUR      = 8;
-    private static final int LINE_SLAYER       = 9;
+    private static final int LINE_PROFILE_TYPE = 3;
+    private static final int LINE_ISLAND       = 4;
+    private static final int LINE_LOCATION     = 5;
+    private static final int LINE_EMPTY1       = 6;
+    private static final int LINE_PURSE        = 7;
+    private static final int LINE_BANK         = 8;
+    private static final int LINE_BITS         = 9;
     private static final int LINE_GEMS         = 10;
-    private static final int LINE_PROFILE_TYPE = 11;
+    private static final int LINE_EMPTY2       = 11;
     private static final int LINE_EVENT        = 12;
     private static final int LINE_COOKIE       = 13;
-    private static final int LINE_EMPTY1       = 14;
-    private static final int LINE_EMPTY2       = 15;
-    private static final int LINE_EMPTY3       = 16;
-    private static final int LINE_EMPTY4       = 17;
-    private static final int LINE_EMPTY5       = 18;
-    private static final int LINE_EMPTY6       = 19;
-    private static final int LINE_EMPTY7       = 20;
-    private static final int LINE_ISLAND       = 21;
+    private static final int LINE_POWER        = 14;
+    private static final int LINE_EMPTY3       = 15;
+    private static final int LINE_FETCHUR      = 16;
+    private static final int LINE_SLAYER       = 17;
+    private static final int LINE_EMPTY4       = 18;
+    private static final int LINE_EMPTY5       = 19;
+    private static final int LINE_EMPTY6       = 20;
+    private static final int LINE_EMPTY7       = 21;
 
     private static final String LOC_SYMBOL_NORMAL = "\u23E3";
     private static final String LOC_SYMBOL_RIFT   = "\u0444";

@@ -48,33 +48,33 @@ public class Scoreboard {
     @Expose
     @ConfigOption(name = "Scoreboard Lines", desc = "Choose which lines to show and drag to reorder. Lines not found on the scoreboard are hidden automatically.")
     @ConfigEditorDraggableList(exampleText = {
-            "\u00a7e03/15/26 \u00a78dh-1",           // 0  SERVER
-            "\u00a7fLate Summer \u00a7b11th",             // 1  SEASON
-            "\u00a7f10:40pm",                        // 2  TIME
-            "\u00a7b⏣ Village",                          // 3  LOCATION
-            "\u00a7fPurse: \u00a7652,763,737",            // 4  PURSE
-            "\u00a7fBank: \u00a76249M",                   // 5  BANK
-            "\u00a7fBits: \u00a7b59,364",                 // 6  BITS
-            "\u00a7fPower: \u00a7dSighted \u00a78(1,863)",     // 7  POWER
-            "\u00a7fFetchur: \u00a7eSand",                // 8  FETCHUR
-            "\u00a7fSlayer Quest",                   // 9  SLAYER
-            "\u00a7fGems: \u00a7a57,873",                 // 10 GEMS
-            "\u00a77♲ Ironman",                      // 11 PROFILE_TYPE
-            "\u00a76Fishing Festival \u00a7f12m 30s",     // 12 EVENT
-            "\u00a76Cookie Buff: \u00a7f3d 17h",           // 13 COOKIE
-            "\u00a78─────────────────", // 14 EMPTY LINE
-            "\u00a78─────────────────", // 15 EMPTY LINE
-            "\u00a78─────────────────",// 16 EMPTY LINE
-            "\u00a78─────────────────",// 17 EMPTY LINE
-            "\u00a78─────────────────",// 18 EMPTY LINE
-            "\u00a78─────────────────",// 19 EMPTY LINE
-            "\u00a78─────────────────", // 20 EMPTY LINE
-            "\u32D6\u00a76 Hub"
+            "\u00a7e03/15/26 \u00a78dh-1",              // 0  SERVER
+            "\u00a7fLate Summer \u00a7b11th",            // 1  SEASON
+            "\u00a7f10:40pm",                            // 2  TIME
+            "\u00a77\u2672 Ironman",                     // 3  PROFILE_TYPE
+            "\u32D6\u00a76 Hub",                         // 4  ISLAND
+            "\u00a7b\u23E3 Village",                     // 5  LOCATION
+            "\u00a78\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500", // 6  EMPTY
+            "\u00a7fPurse: \u00a7652,763,737",           // 7  PURSE
+            "\u00a7fBank: \u00a76249M",                  // 8  BANK
+            "\u00a7fBits: \u00a7b59,364",                // 9  BITS
+            "\u00a7fGems: \u00a7a57,873",                // 10 GEMS
+            "\u00a78\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500", // 11 EMPTY
+            "\u00a76Fishing Festival \u00a7f12m 30s",    // 12 EVENT
+            "\u00a7dCookie Buff: \u00a7f3d 17h",         // 13 COOKIE
+            "\u00a7fPower: \u00a7dSighted", // 14 POWER
+            "\u00a78\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500", // 15 EMPTY
+            "\u00a7fFetchur: \u00a7eSand",               // 16 FETCHUR
+            "\u00a7fSlayer Quest\n\u00a74Voidgloom Seraph IV\n\u00a77(1227/1,400) Combat XP",  // 17 SLAYER
+            "\u00a78\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500", // 18 EMPTY
+            "\u00a78\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500", // 19 EMPTY
+            "\u00a78\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500", // 20 EMPTY
+            "\u00a78\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"  // 21 EMPTY
     })
     @ConfigAccordionId(id = 20)
     public List<Integer> scoreboardLines =
-            new ArrayList<>(Arrays.asList(0, 1, 2, 3, 14, 4, 5, 6, 14, 7, 8, 14, 9, 10, 11, 12, 13, 21));
+            new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17));
 
     @Expose
-    public Position position = new Position(-2, 10);
+    public Position position = new Position(-2, 140);
 }
