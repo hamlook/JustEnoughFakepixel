@@ -46,21 +46,27 @@ public class Scoreboard {
     public boolean editPosDummy = false;
 
     @Expose
-    @ConfigOption(name = "Scoreboard Lines", desc = "Choose which lines to show and drag to reorder")
+    @ConfigOption(name = "Scoreboard Lines", desc = "Choose which lines to show and drag to reorder. Lines not found on the scoreboard are hidden automatically.")
     @ConfigEditorDraggableList(exampleText = {
-            "Server / Date",
-            "Season / Day",
-            "Time",
-            "Location",
-            "Purse",
-            "Bank",
-            "Bits",
-            "Power",
-            "Fetchur"
+            "§e03/15/26 §8dh-1",           // 0  SERVER
+            "§fLate Summer §b11th",             // 1  SEASON
+            "§f10:40pm",                        // 2  TIME
+            "§7♲ Ironman",                      // 11 PROFILE_TYPE
+            "§b⏣ Hub",                          // 3  LOCATION
+            "§fPurse: §652,763,737",            // 4  PURSE
+            "§fBank: §6249M",                   // 5  BANK
+            "§fBits: §b59,364",                 // 6  BITS
+            "§fPower: §dSighted §8(1,863)",     // 7  POWER
+            "§fFetchur: §eSand",                // 8  FETCHUR
+            "§fSlayer Quest",                   // 9  SLAYER
+            "§fGems: §a57,873",                 // 10 GEMS
+            "§6Fishing Festival §f12m 30s",     // 12 EVENT
+            "§6Cookie Buff: §f3d 17h",           // 13 COOKIE
+            "§8─────────────────"              // 14 EMPTY LINE
     })
     @ConfigAccordionId(id = 20)
     public List<Integer> scoreboardLines =
-            new ArrayList<>(Arrays.asList(0,1,3,2,4,5,6,7,8));
+            new ArrayList<>(Arrays.asList(0, 1, 2, 3, 14, 4, 5, 6, 14, 7, 8, 14, 9, 10, 11, 12, 13));
 
     @Expose
     public Position position = new Position(-2, 10);

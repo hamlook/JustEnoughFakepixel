@@ -22,6 +22,51 @@ public class TablistParser {
 
     public static ScoreboardUtils.Location getCurrentLocation() { return currentLocation; }
 
+    private static net.minecraft.util.IChatComponent getTabFooter() {
+        try {
+            Minecraft mc = Minecraft.getMinecraft();
+            if (mc.thePlayer == null) return null;
+            java.lang.reflect.Field f = mc.ingameGUI.getTabList().getClass().getDeclaredField("field_175255_h");
+            f.setAccessible(true);
+            return (net.minecraft.util.IChatComponent) f.get(mc.ingameGUI.getTabList());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static String readGems() {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.thePlayer == null) return null;
+        GuiPlayerTabOverlay tab = mc.ingameGUI.getTabList();
+        List<NetworkPlayerInfo> infos = PLAYER_ORDERING.sortedCopy(mc.thePlayer.sendQueue.getPlayerInfoMap());
+        boolean inServer = false;
+        for (NetworkPlayerInfo info : infos) {
+            String raw = tab.getPlayerName(info);
+            if (raw == null || raw.isEmpty()) continue;
+            String line = net.minecraft.util.StringUtils.stripControlCodes(raw).trim();
+            if (line.isEmpty()) continue;
+            if (line.equals("Server Info") || raw.contains("Server Info")) { inServer = true; continue; }
+            if (inServer && (line.equals("Account Info") || line.equals("Player Stats"))) { inServer = false; continue; }
+            if (inServer && line.startsWith("Gems: ")) return line.substring("Gems: ".length()).trim();
+        }
+        return null;
+    }
+
+    public static String readCookieBuff() {
+        net.minecraft.util.IChatComponent footer = getTabFooter();
+        if (footer == null) return null;
+        String[] lines = net.minecraft.util.StringUtils.stripControlCodes(footer.getFormattedText()).split("\n");
+        boolean sawCookie = false;
+        for (String line : lines) {
+            String l = line.trim();
+            if (l.isEmpty()) continue;
+            if (!sawCookie && l.contains("Cookie Buff")) { sawCookie = true; continue; }
+            if (sawCookie && l.contains("Active")) continue;
+            if (sawCookie) return l;
+        }
+        return null;
+    }
+
     private static final int TICK_INTERVAL = 20;
     private int tickCounter = 0;
 
@@ -75,17 +120,17 @@ public class TablistParser {
 
             String line = net.minecraft.util.StringUtils.stripControlCodes(raw).trim();
 
-            if (raw.contains("§3§l Server Info§r")) {
+            if (raw.contains("\u00A73\u00A7l Server Info\u00A7r")) {
                 inServerSection  = true;
                 inAccountSection = false;
                 continue;
             }
-            if (raw.contains("§6§lAccount Info") || line.equals("Account Info")) {
+            if (raw.contains("\u00A76\u00A7lAccount Info") || line.equals("Account Info")) {
                 inAccountSection = true;
                 inServerSection  = false;
                 continue;
             }
-            if (raw.contains("§2§lPlayer Stats§r")
+            if (raw.contains("\u00A72\u00A7lPlayer Stats\u00A7r")
                     || line.equals("Player Stats") || line.equals("Quests")
                     || line.equals("Party")        || line.equals("Dungeon")) {
                 inServerSection  = false;
@@ -131,7 +176,7 @@ public class TablistParser {
         String clean = stripColor(afterColon).trim();
         if (clean.contains(" / ")) {
             String[] parts = clean.split(" / ", 2);
-            return parts[0].trim() + " §7/ §6" + parts[1].trim();
+            return parts[0].trim() + " \u00A77/ \u00A76" + parts[1].trim();
         }
         return clean.isEmpty() ? fallback : clean;
     }

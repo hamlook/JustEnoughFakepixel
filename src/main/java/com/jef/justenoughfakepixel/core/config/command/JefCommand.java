@@ -7,14 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
-/**
- * The {@code /jef} command (alias: {@code /justenoughfakepixel}).
- *
- * <pre>
- *   /jef               – opens the config GUI main screen
- *   /jef &lt;category&gt;   – opens the config GUI on that category
- * </pre>
- */
 public class JefCommand extends SimpleCommand {
 
     @Override

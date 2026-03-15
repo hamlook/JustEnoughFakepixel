@@ -7,6 +7,7 @@ import com.jef.justenoughfakepixel.utils.ColorUtils;
 import com.jef.justenoughfakepixel.features.mining.FetchurHelper;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
 import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
+import com.jef.justenoughfakepixel.utils.TablistParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
@@ -26,31 +27,48 @@ public class CustomScoreboard extends JefOverlay {
 
     private static final int TITLE_COL = 0xFFFFAA00;
 
-    private static final int LINE_SERVER = 0;
-    private static final int LINE_SEASON = 1;
-    private static final int LINE_TIME = 2;
-    private static final int LINE_LOCATION = 3;
-    private static final int LINE_PURSE = 4;
-    private static final int LINE_BANK = 5;
-    private static final int LINE_BITS = 6;
-    private static final int LINE_POWER = 7;
-    private static final int LINE_FETCHUR = 8;
+    private static final int LINE_SERVER       = 0;
+    private static final int LINE_SEASON       = 1;
+    private static final int LINE_TIME         = 2;
+    private static final int LINE_LOCATION     = 3;
+    private static final int LINE_PURSE        = 4;
+    private static final int LINE_BANK         = 5;
+    private static final int LINE_BITS         = 6;
+    private static final int LINE_POWER        = 7;
+    private static final int LINE_FETCHUR      = 8;
+    private static final int LINE_SLAYER       = 9;
+    private static final int LINE_GEMS         = 10;
+    private static final int LINE_PROFILE_TYPE = 11;
+    private static final int LINE_EVENT        = 12;
+    private static final int LINE_COOKIE       = 13;
+    private static final int LINE_EMPTY        = 14;
 
     private static final String LOC_SYMBOL_NORMAL = "\u23E3";
-    private static final String LOC_SYMBOL_RIFT = "\u0444";
+    private static final String LOC_SYMBOL_RIFT   = "\u0444";
 
+    private static final Pattern SERVER_PATTERN =
+            Pattern.compile("\\s*\\d{2}/\\d{2}/\\d{2}.*");
     private static final Pattern SEASON_PATTERN =
             Pattern.compile("\\s*(?:(?:Late|Early) )?(?:Spring|Summer|Autumn|Winter) \\d+.*");
     private static final Pattern TIME_PATTERN =
             Pattern.compile("\\s*\\d+:\\d+(?:am|pm).*");
-    private static final Pattern SERVER_PATTERN =
-            Pattern.compile("\\s*\\d{2}/\\d{2}/\\d{2}.*");
+    private static final Pattern PROFILE_TYPE_PATTERN =
+            Pattern.compile("(?:Ironman|Stranded|Bingo|Classic)");
     private static final Pattern PURSE_PATTERN =
             Pattern.compile("(?:Piggy|Purse): [\\d,.]+");
-    private static final Pattern BITS_PATTERN =
-            Pattern.compile("Bits: [\\d,.]+");
     private static final Pattern BANK_PATTERN =
             Pattern.compile("Bank: .+");
+    private static final Pattern BITS_PATTERN =
+            Pattern.compile("Bits: [\\d,.]+");
+    private static final Pattern GEMS_PATTERN =
+            Pattern.compile("Gems: [\\d,.]+");
+    private static final Pattern EVENT_PATTERN =
+            Pattern.compile("(?:Fishing Festival|Mining Fiesta|Spooky Festival|Season of Jerry|Traveling Zoo|New Year Celebration|Election|Fallen Star|Festival of Gifts).*");
+    private static final Pattern SLAYER_PATTERN =
+            Pattern.compile("Slayer Quest");
+    // Suppress cookie lines from scoreboard passthrough — display comes from tablist
+    private static final Pattern COOKIE_SUPPRESS_PATTERN =
+            Pattern.compile("Cookie Buff: .*|\\d+d\\s+\\d+h.*");
     private static final Pattern WEBSITE_PATTERN =
             Pattern.compile(".*fakepixel.*");
 
@@ -61,9 +79,7 @@ public class CustomScoreboard extends JefOverlay {
         instance = this;
     }
 
-    public static CustomScoreboard getInstance() {
-        return instance;
-    }
+    public static CustomScoreboard getInstance() { return instance; }
 
     public static boolean isActive() {
         return JefConfig.feature != null &&
@@ -71,30 +87,11 @@ public class CustomScoreboard extends JefOverlay {
                 JefConfig.feature.scoreboard.enabled;
     }
 
-    @Override
-    public Position getPosition() {
-        return JefConfig.feature.scoreboard.position;
-    }
-
-    @Override
-    public float getScale() {
-        return JefConfig.feature.scoreboard.scale;
-    }
-
-    @Override
-    public int getBgColor() {
-        return ChromaColour.specialToChromaRGB(JefConfig.feature.scoreboard.scoreboardBg);
-    }
-
-    @Override
-    public int getCornerRadius() {
-        return (int) JefConfig.feature.scoreboard.cornerRadius;
-    }
-
-    @Override
-    protected boolean extraGuard() {
-        return isActive();
-    }
+    @Override public Position getPosition()    { return JefConfig.feature.scoreboard.position; }
+    @Override public float   getScale()        { return JefConfig.feature.scoreboard.scale; }
+    @Override public int     getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.scoreboard.scoreboardBg); }
+    @Override public int     getCornerRadius() { return (int) JefConfig.feature.scoreboard.cornerRadius; }
+    @Override protected boolean extraGuard()   { return isActive(); }
 
     @SubscribeEvent
     public void onRender(RenderGameOverlayEvent.Post event) {
@@ -107,11 +104,9 @@ public class CustomScoreboard extends JefOverlay {
         List<?> raw = JefConfig.feature.scoreboard.scoreboardLines;
         List<Integer> result = new ArrayList<>();
         if (raw == null) return result;
-
         for (Object o : raw)
             if (o instanceof Number)
                 result.add(((Number) o).intValue());
-
         return result;
     }
 
@@ -123,62 +118,72 @@ public class CustomScoreboard extends JefOverlay {
 
         Collections.reverse(raw);
 
-        String serverRaw = null, seasonRaw = null, timeRaw = null;
-        String locationRaw = null, purseRaw = null, bankRaw = null;
-        String bitsRaw = null, websiteRaw = null;
+        boolean inDungeon = ScoreboardUtils.isInDungeon();
+
+        String serverRaw      = null;
+        String seasonRaw      = null;
+        String timeRaw        = null;
+        String locationRaw    = null;
+        String purseRaw       = null;
+        String bankRaw        = null;
+        String bitsRaw        = null;
+        String profileTypeRaw = null;
+        String eventRaw       = null;
+        String websiteRaw     = null;
+        List<String> slayerLines = new ArrayList<>();
 
         List<String> claimed = new ArrayList<>();
 
-        for (String l : raw) {
-
+        for (int li = 0; li < raw.size(); li++) {
+            String l = raw.get(li);
             String c = stripColor(l).trim();
             if (c.isEmpty()) continue;
 
             if (locationRaw == null && (l.contains(LOC_SYMBOL_NORMAL) || l.contains(LOC_SYMBOL_RIFT))) {
-                locationRaw = l;
-                claimed.add(l);
-                continue;
+                locationRaw = l; claimed.add(l); continue;
             }
-
             if (serverRaw == null && SERVER_PATTERN.matcher(c).matches()) {
-                serverRaw = l;
-                claimed.add(l);
-                continue;
+                serverRaw = l; claimed.add(l); continue;
             }
-
             if (seasonRaw == null && SEASON_PATTERN.matcher(c).matches()) {
-                seasonRaw = l;
-                claimed.add(l);
-                continue;
+                seasonRaw = l; claimed.add(l); continue;
             }
-
             if (timeRaw == null && TIME_PATTERN.matcher(c).matches()) {
-                timeRaw = l;
-                claimed.add(l);
-                continue;
+                timeRaw = l; claimed.add(l); continue;
             }
-
             if (purseRaw == null && PURSE_PATTERN.matcher(c).find()) {
-                purseRaw = l;
-                claimed.add(l);
-                continue;
+                purseRaw = l; claimed.add(l); continue;
             }
-
             if (bankRaw == null && BANK_PATTERN.matcher(c).find()) {
-                bankRaw = l;
-                claimed.add(l);
-                continue;
+                bankRaw = l; claimed.add(l); continue;
             }
-
             if (bitsRaw == null && BITS_PATTERN.matcher(c).find()) {
-                bitsRaw = l;
+                bitsRaw = l; claimed.add(l); continue;
+            }
+            if (COOKIE_SUPPRESS_PATTERN.matcher(c).find()) {
+                claimed.add(l); continue;
+            }
+            if (profileTypeRaw == null && PROFILE_TYPE_PATTERN.matcher(c).find()) {
+                profileTypeRaw = l; claimed.add(l); continue;
+            }
+            if (eventRaw == null && EVENT_PATTERN.matcher(c).find()) {
+                eventRaw = l; claimed.add(l); continue;
+            }
+            if (slayerLines.isEmpty() && SLAYER_PATTERN.matcher(c).find()) {
                 claimed.add(l);
+                slayerLines.add(l);
+                for (int offset = 1; offset <= 2 && (li + offset) < raw.size(); offset++) {
+                    String next = raw.get(li + offset);
+                    if (!stripColor(next).trim().isEmpty()) {
+                        slayerLines.add(next);
+                        claimed.add(next);
+                    }
+                }
+                li += 2;
                 continue;
             }
-
             if (websiteRaw == null && WEBSITE_PATTERN.matcher(c).matches()) {
-                websiteRaw = l;
-                claimed.add(l);
+                websiteRaw = l; claimed.add(l);
             }
         }
 
@@ -186,11 +191,9 @@ public class CustomScoreboard extends JefOverlay {
 
         String title = ScoreboardUtils.getServerId();
         if (title == null || title.isEmpty()) title = "SKYBLOCK";
-
         lines.add("\u00A76\u00A7l" + title);
 
         for (int id : getLineOrder()) {
-
             switch (id) {
 
                 case LINE_SERVER:
@@ -213,29 +216,62 @@ public class CustomScoreboard extends JefOverlay {
                     if (purseRaw != null) lines.add(purseRaw);
                     break;
 
+                case LINE_BANK:
+                    if (!inDungeon) {
+                        if (bankRaw != null) {
+                            lines.add(bankRaw);
+                        } else {
+                            String bank = BankParser.getBank();
+                            if (bank != null) lines.add("\u00A7fBank: \u00A76" + bank);
+                        }
+                    }
+                    break;
+
                 case LINE_BITS:
                     if (bitsRaw != null) lines.add(bitsRaw);
                     break;
 
                 case LINE_POWER:
                     String power = MaxwellPowerSync.getPower();
-                    if (power != null && ScoreboardUtils.isOnSkyblock()) {
+                    if (power != null && ScoreboardUtils.isOnSkyblock())
                         lines.add("\u00A7fPower: \u00A7d" + power);
-                    }
-                    break;
-
-                case LINE_BANK:
-                    if (bankRaw != null) {
-                        lines.add(bankRaw);
-                    } else {
-                        String bank = BankParser.getBank();
-                        if (bank != null) lines.add("\u00A7fBank: \u00A76" + bank);
-                    }
                     break;
 
                 case LINE_FETCHUR:
                     if (ScoreboardUtils.isOnSkyblock())
-                        lines.add("§fFetchur: §e" + FetchurHelper.getTodaysItem());
+                        lines.add("\u00A7fFetchur: \u00A7e" + FetchurHelper.getTodaysItem());
+                    break;
+
+                case LINE_SLAYER:
+                    if (!inDungeon)
+                        lines.addAll(slayerLines);
+                    break;
+
+                case LINE_GEMS:
+                    if (!inDungeon) {
+                        String gems = TablistParser.readGems();
+                        if (gems != null) lines.add("\u00A7fGems: \u00A7a" + gems);
+                    }
+                    break;
+
+                case LINE_PROFILE_TYPE:
+                    if (profileTypeRaw != null) lines.add(profileTypeRaw);
+                    break;
+
+                case LINE_EVENT:
+                    if (eventRaw != null) lines.add(eventRaw);
+                    break;
+
+                case LINE_COOKIE:
+                    if (!inDungeon) {
+                        String cookie = TablistParser.readCookieBuff();
+                        if (cookie != null)
+                            lines.add("\u00A76Cookie Buff \u00A7f" + cookie);
+                    }
+                    break;
+
+                case LINE_EMPTY:
+                    lines.add("");
                     break;
             }
         }
@@ -253,7 +289,7 @@ public class CustomScoreboard extends JefOverlay {
     @Override
     public void render(boolean preview) {
 
-        if (!preview && (!extraGuard())) return;
+        if (!preview && !extraGuard()) return;
 
         List<String> lines = getLines(preview);
         if (lines.isEmpty()) return;
@@ -264,7 +300,6 @@ public class CustomScoreboard extends JefOverlay {
         int ss = SUPERSAMPLE;
 
         int maxW = 60;
-
         for (String line : lines)
             maxW = Math.max(maxW, mc.fontRendererObj.getStringWidth(line));
 
@@ -284,30 +319,23 @@ public class CustomScoreboard extends JefOverlay {
         if (pos.isCenterY()) y -= (int)(boxH * scale / 2);
 
         GL11.glPushMatrix();
-
         GL11.glTranslatef(x, y, 0);
         GL11.glScalef(scale / ss, scale / ss, 1f);
 
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
 
-        int r = getCornerRadius() * ss;
-
         int bgColor = getBgColor();
-
         if ((bgColor >>> 24) != 0)
-            drawRoundedRect(0,0,boxW*ss,boxH*ss,r,bgColor);
+            drawRoundedRect(0, 0, boxW * ss, boxH * ss, getCornerRadius() * ss, bgColor);
 
         GL11.glScalef(ss, ss, 1f);
 
         String title = lines.get(0);
-
         int titleX = (boxW - mc.fontRendererObj.getStringWidth(title)) / 2;
-
         mc.fontRendererObj.drawStringWithShadow(title, titleX, PAD_Y, TITLE_COL);
 
         int textY = PAD_Y + lh;
-
         for (int i = 1; i < lines.size(); i++) {
             mc.fontRendererObj.drawStringWithShadow(lines.get(i), PAD_X, textY, 0xFFFFFF);
             textY += lh;
