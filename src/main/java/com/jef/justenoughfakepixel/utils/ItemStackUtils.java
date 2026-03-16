@@ -4,16 +4,16 @@ package com.jef.justenoughfakepixel.utils;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.events.RenderItemOverlayEvent;
+import com.jef.justenoughfakepixel.utils.ColorUtils;
+import com.jef.justenoughfakepixel.utils.ItemUtils;
+import com.jef.justenoughfakepixel.utils.RomanNumeralParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-
-import com.jef.justenoughfakepixel.utils.ColorUtils;
 
 public class ItemStackUtils {
 
@@ -28,7 +28,8 @@ public class ItemStackUtils {
     }
 
     private String getTip(ItemStack stack) {
-        String id = getSkyblockId(stack);
+        String id = ItemUtils.getInternalName(stack);
+        if (id.isEmpty()) id = null;
         if (id == null) return null;
 
         if (id.equals("ENCHANTED_BOOK") && JefConfig.feature.misc.itemStackTips) {
@@ -44,7 +45,7 @@ public class ItemStackUtils {
 
     /** Extracts the last word of the display name and converts it from roman numeral to integer. */
     private String getEnchantLevel(ItemStack stack) {
-        String name = strip(stack.getDisplayName());
+        String name = ColorUtils.stripColor(stack.getDisplayName());
         if (name.isEmpty()) return null;
         String[] parts = name.split(" ");
         String last = parts[parts.length - 1];
@@ -82,14 +83,7 @@ public class ItemStackUtils {
     private boolean isInContainer(String name) {
         if (!(mc.currentScreen instanceof GuiChest)) return false;
         ContainerChest cc = (ContainerChest) ((GuiChest) mc.currentScreen).inventorySlots;
-        return name.equals(strip(cc.getLowerChestInventory().getDisplayName().getUnformattedText()));
+        return name.equals(ColorUtils.stripColor(cc.getLowerChestInventory().getDisplayName().getUnformattedText()));
     }
 
-    private static String getSkyblockId(ItemStack stack) {
-        if (stack == null || !stack.hasTagCompound()) return null;
-        NBTTagCompound extra = stack.getTagCompound().getCompoundTag("ExtraAttributes");
-        return extra.hasKey("id") ? extra.getString("id") : null;
-    }
-
-    private static String strip(String s) { return ColorUtils.stripColor(s); }
 }

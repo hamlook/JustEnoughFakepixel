@@ -74,7 +74,7 @@ public class MaxwellPowerSync {
         GuiChest chest = (GuiChest) mc.currentScreen;
         IInventory inv = ((ContainerChest) chest.inventorySlots).getLowerChestInventory();
 
-        String title = stripColor(inv.getDisplayName().getUnformattedText());
+        String title = ColorUtils.stripColor(inv.getDisplayName().getUnformattedText());
         if (!title.contains("Accessory Bag Thaumaturgy")) return;
 
         for (int i = 0; i < inv.getSizeInventory(); i++) {
@@ -82,7 +82,7 @@ public class MaxwellPowerSync {
             if (item == null || !item.hasTagCompound()) continue;
 
             if (hasSelectedLine(item)) {
-                String name = stripColor(item.getDisplayName()).trim();
+                String name = ColorUtils.stripColor(item.getDisplayName()).trim();
                 if (!name.isEmpty() && !name.equals(data.power)) {
                     data.power = name;
                     save(); // only save when value actually changes
@@ -98,7 +98,7 @@ public class MaxwellPowerSync {
                     .getCompoundTag("display")
                     .getTagList("Lore", 8);
             for (int i = 0; i < lore.tagCount(); i++) {
-                if (stripColor(lore.getStringTagAt(i)).trim().equals("Power is selected!")) {
+                if (ColorUtils.stripColor(lore.getStringTagAt(i)).trim().equals("Power is selected!")) {
                     return true;
                 }
             }
@@ -106,5 +106,4 @@ public class MaxwellPowerSync {
         return false;
     }
 
-    private static String stripColor(String s) { return ColorUtils.stripColor(s); }
 }

@@ -65,7 +65,6 @@ public class Misc {
     @ConfigAccordionId(id = 3)
     public float hudScale = 1f;
 
-
     @Expose
     @ConfigOption(name = "Search Bar", desc = "Search bar settings")
     @ConfigEditorAccordion(id = 10)
@@ -90,11 +89,48 @@ public class Misc {
     public boolean editSearchBarPosDummy = false;
 
     @Expose
-    public Position searchBarPos = new Position(4, 4);
+    @ConfigOption(name = "Current Pet", desc = "Shows your active pet as a HUD overlay")
+    @ConfigEditorAccordion(id = 11)
+    public boolean currentPetAccordion = false;
 
+    @Expose
+    @ConfigOption(name = "Enable", desc = "Show the current pet overlay")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 11)
+    public boolean showCurrentPet = true;
+
+    @Expose
+    @ConfigOption(name = "Background Color", desc = "Background color of the pet overlay (alpha controls opacity)")
+    @ConfigEditorColour
+    @ConfigAccordionId(id = 11)
+    public String currentPetBgColor = "0:136:0:0:0";
+
+    @Expose
+    @ConfigOption(name = "Corner Radius", desc = "Roundness of the pet overlay corners")
+    @ConfigEditorSliderAnnotation(minValue = 0f, maxValue = 12f, minStep = 1f)
+    @ConfigAccordionId(id = 11)
+    public int currentPetCornerRadius = 4;
+
+    @Expose
+    @ConfigOption(name = "Scale", desc = "Size of the pet overlay")
+    @ConfigEditorSliderAnnotation(minValue = 0.5f, maxValue = 3f, minStep = 0.1f)
+    @ConfigAccordionId(id = 11)
+    public float currentPetScale = 1f;
+
+    @Expose
+    @ConfigOption(name = "Edit Position", desc = "Drag to reposition the pet overlay")
+    @ConfigEditorButton(runnableId = "openCurrentPetEditor", buttonText = "Edit")
+    @ConfigAccordionId(id = 11)
+    public boolean editCurrentPetPosDummy = false;
+
+    @Expose
+    public Position searchBarPos = new Position(4, 4);
 
     @Expose
     public Position hudPos = new Position(2, 2);
+
+    @Expose
+    public Position currentPetPos = new Position(4, 4);
 
     @Expose
     @ConfigOption(name = "Item Stack Tips", desc = "Shows enchant levels on books and floor numbers on Catacombs passes")

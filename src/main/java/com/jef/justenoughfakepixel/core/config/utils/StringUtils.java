@@ -1,5 +1,7 @@
 package com.jef.justenoughfakepixel.core.config.utils;
 
+import com.jef.justenoughfakepixel.utils.ColorUtils;
+
 import java.util.Map;
 import java.util.NavigableMap;
 
@@ -7,9 +9,8 @@ public final class StringUtils {
 
     private StringUtils() {}
 
-    /** Strips all {@code §x} colour/formatting codes from a string. */
     public static String cleanColour(String in) {
-        return in.replaceAll("(?i)\\u00A7.", "");
+        return ColorUtils.stripColor(in);
     }
 
     /** Joins array elements from {@code start} onward with spaces. */

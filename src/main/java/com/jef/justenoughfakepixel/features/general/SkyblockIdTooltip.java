@@ -1,10 +1,10 @@
 package com.jef.justenoughfakepixel.features.general;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.utils.ItemUtils;
 import com.jef.justenoughfakepixel.utils.RomanNumeralParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.NetworkPlayerInfo;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -33,16 +33,11 @@ public class SkyblockIdTooltip {
         }
 
         if (doSkyblock) {
-            try {
-                NBTTagCompound extra = e.itemStack.getSubCompound("ExtraAttributes", false);
-                if (extra != null && extra.hasKey("id", 8)) {
-                    String id = extra.getString("id");
-                    if (id != null && !id.isEmpty()) {
-                        String line = EnumChatFormatting.DARK_GRAY + "skyblock:" + id;
-                        if (!e.toolTip.contains(line)) e.toolTip.add(line);
-                    }
-                }
-            } catch (Throwable ignored) {}
+            String id = ItemUtils.getInternalName(e.itemStack);
+            if (!id.isEmpty()) {
+                String line = EnumChatFormatting.DARK_GRAY + "skyblock:" + id;
+                if (!e.toolTip.contains(line)) e.toolTip.add(line);
+            }
         }
     }
 

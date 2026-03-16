@@ -99,7 +99,7 @@ public class GuiElementTextField {
     }
 
     public int strLenNoColor(String str) {
-        return str.replaceAll("(?i)\\u00A7.", "").length();
+        return StringUtils.cleanColour(str).length();
     }
 
     public int getCursorPos(int mouseX, int mouseY) {

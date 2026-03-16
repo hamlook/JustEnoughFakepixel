@@ -43,6 +43,7 @@ public class Config {
             case "openFetchurEditor":     JefConfig.openFetchurEditor();      break;
             case "openDianaOverlayEditor":   JefConfig.openDianaOverlayEditor();    break;
             case "openSearchBarEditor":   JefConfig.openSearchBarEditor();    break;
+            case "openCurrentPetEditor": JefConfig.openCurrentPetEditor();    break;
         }
     }
 }

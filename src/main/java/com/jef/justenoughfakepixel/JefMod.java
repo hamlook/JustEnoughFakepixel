@@ -2,35 +2,25 @@ package com.jef.justenoughfakepixel;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.command.SimpleCommandFilter;
-import com.jef.justenoughfakepixel.features.mining.FetchurOverlay;
-import com.jef.justenoughfakepixel.utils.ItemStackUtils;
-import com.jef.justenoughfakepixel.utils.PartyCommands;
-import com.jef.justenoughfakepixel.utils.TablistParser;
-import com.jef.justenoughfakepixel.features.general.DamageSplashes;
-import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
-import com.jef.justenoughfakepixel.features.scoreboard.MaxwellPowerSync;
-import com.jef.justenoughfakepixel.features.general.SkyblockIdTooltip;
-import com.jef.justenoughfakepixel.features.general.CursorResetHandler;
-import com.jef.justenoughfakepixel.features.misc.BrewingStandHelper;
-import com.jef.justenoughfakepixel.features.misc.PerformanceHUD;
-import com.jef.justenoughfakepixel.features.misc.SkillXpDisplay;
-import com.jef.justenoughfakepixel.features.misc.SearchBar;
+import com.jef.justenoughfakepixel.features.diana.*;
 import com.jef.justenoughfakepixel.features.dungeons.BloodMobDisplay;
 import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
+import com.jef.justenoughfakepixel.features.general.CursorResetHandler;
+import com.jef.justenoughfakepixel.features.general.DamageSplashes;
+import com.jef.justenoughfakepixel.features.general.SkyblockIdTooltip;
+import com.jef.justenoughfakepixel.features.mining.FetchurOverlay;
+import com.jef.justenoughfakepixel.features.misc.*;
+import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
+import com.jef.justenoughfakepixel.features.scoreboard.MaxwellPowerSync;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointCommand;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointRenderer;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointStorage;
-import com.jef.justenoughfakepixel.features.diana.DianaCommand;
-import com.jef.justenoughfakepixel.features.diana.DianaEventOverlay;
-import com.jef.justenoughfakepixel.features.diana.DianaLootOverlay;
-import com.jef.justenoughfakepixel.features.diana.DianaMobHealthOverlay;
-import com.jef.justenoughfakepixel.features.diana.InqHealthOverlay;
-import com.jef.justenoughfakepixel.features.diana.DianaMobDetect;
-import com.jef.justenoughfakepixel.features.diana.DianaStats;
-import com.jef.justenoughfakepixel.features.diana.DianaTracker;
-import com.jef.justenoughfakepixel.repo.RepoHandler;
 import com.jef.justenoughfakepixel.repo.JefRepo;
+import com.jef.justenoughfakepixel.repo.RepoHandler;
 import com.jef.justenoughfakepixel.repo.VersionChecker;
+import com.jef.justenoughfakepixel.utils.ItemStackUtils;
+import com.jef.justenoughfakepixel.utils.PartyCommands;
+import com.jef.justenoughfakepixel.utils.TablistParser;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -48,8 +38,8 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 )
 public class JefMod {
 
-    public static final String MODID = "justenoughfakepixel";
-    public static final String NAME  = "JustEnoughFakepixel";
+    public static final String MODID   = "justenoughfakepixel";
+    public static final String NAME    = "JustEnoughFakepixel";
     public static final String VERSION = "1.2.2";
 
     @SubscribeEvent
@@ -68,6 +58,8 @@ public class JefMod {
         WaypointStorage.getInstance().initFile(JefConfig.configDirectory);
         DianaStats.getInstance().initFile(JefConfig.configDirectory);
         MaxwellPowerSync.getInstance().initFile(JefConfig.configDirectory);
+        PetCache.getInstance().initFile(JefConfig.configDirectory);
+        CurrentPetTracker.getInstance().initFile(JefConfig.configDirectory);
     }
 
     @Mod.EventHandler
@@ -76,6 +68,12 @@ public class JefMod {
         WaypointStorage.getInstance().load();
         DianaStats.getInstance().load();
         MaxwellPowerSync.getInstance().load();
+        PetCache.getInstance().load();
+        CurrentPetTracker.getInstance().load();
+
+        if (JefConfig.feature.misc.showCurrentPet)
+            PetCache.getInstance().warmupTextures();
+
         MinecraftForge.EVENT_BUS.register(this);
 
         MinecraftForge.EVENT_BUS.register(new SearchBar());
@@ -102,6 +100,8 @@ public class JefMod {
         MinecraftForge.EVENT_BUS.register(new DianaLootOverlay());
         MinecraftForge.EVENT_BUS.register(new InqHealthOverlay());
         MinecraftForge.EVENT_BUS.register(new DianaMobHealthOverlay());
+        MinecraftForge.EVENT_BUS.register(CurrentPetTracker.getInstance());
+        MinecraftForge.EVENT_BUS.register(new CurrentPetOverlay());
         ClientCommandHandler.instance.registerCommand(new DianaCommand());
         ClientCommandHandler.instance.registerCommand(new WaypointCommand());
     }

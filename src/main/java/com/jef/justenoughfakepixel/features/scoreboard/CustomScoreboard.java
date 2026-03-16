@@ -154,7 +154,7 @@ public class CustomScoreboard extends JefOverlay {
 
         for (int li = 0; li < raw.size(); li++) {
             String l = raw.get(li);
-            String c = stripColor(l).trim();
+            String c = ColorUtils.stripColor(l).trim();
             if (c.isEmpty()) continue;
 
             if (locationRaw == null && (l.contains(LOC_SYMBOL_NORMAL) || l.contains(LOC_SYMBOL_RIFT))) {
@@ -188,7 +188,7 @@ public class CustomScoreboard extends JefOverlay {
                 eventLines.add(l); claimed.add(l);
                 if (li + 1 < raw.size()) {
                     String next = raw.get(li + 1);
-                    String nc = stripColor(next).trim();
+                    String nc = ColorUtils.stripColor(next).trim();
                     if (!nc.isEmpty()) { eventLines.add(next); claimed.add(next); li++; }
                 }
                 continue;
@@ -198,7 +198,7 @@ public class CustomScoreboard extends JefOverlay {
                 slayerLines.add(l);
                 for (int offset = 1; offset <= 2 && (li + offset) < raw.size(); offset++) {
                     String next = raw.get(li + offset);
-                    if (!stripColor(next).trim().isEmpty()) {
+                    if (!ColorUtils.stripColor(next).trim().isEmpty()) {
                         slayerLines.add(next);
                         claimed.add(next);
                     }
@@ -325,7 +325,7 @@ public class CustomScoreboard extends JefOverlay {
         }
 
         for (String l : raw)
-            if (!claimed.contains(l) && !stripColor(l).trim().isEmpty())
+            if (!claimed.contains(l) && !ColorUtils.stripColor(l).trim().isEmpty())
                 lines.add(l);
 
         if (websiteRaw != null)
@@ -393,5 +393,4 @@ public class CustomScoreboard extends JefOverlay {
         GL11.glPopMatrix();
     }
 
-    private static String stripColor(String s) { return ColorUtils.stripColor(s); }
 }

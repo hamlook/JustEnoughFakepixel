@@ -163,7 +163,7 @@ public class TablistParser {
                 }
                 if (line.startsWith("Purse: ") || line.startsWith("Piggy: ")) {
                     int colon = line.indexOf(": ");
-                    String amt = stripColor(raw.substring(raw.indexOf(": ") + 2)).trim();
+                    String amt = ColorUtils.stripColor(raw.substring(raw.indexOf(": ") + 2)).trim();
                     BankParser.setPurse(amt.isEmpty() ? line.substring(colon + 2) : amt);
                     continue;
                 }
@@ -173,7 +173,7 @@ public class TablistParser {
 
     private static String parseAmount(String raw, String fallback) {
         String afterColon = raw.substring(raw.indexOf(": ") + 2);
-        String clean = stripColor(afterColon).trim();
+        String clean = ColorUtils.stripColor(afterColon).trim();
         if (clean.contains(" / ")) {
             String[] parts = clean.split(" / ", 2);
             return parts[0].trim() + " \u00A77/ \u00A76" + parts[1].trim();
@@ -198,5 +198,4 @@ public class TablistParser {
         return -1;
     }
 
-    private static String stripColor(String s) { return ColorUtils.stripColor(s); }
 }
