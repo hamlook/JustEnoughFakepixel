@@ -23,9 +23,9 @@ public class DianaLootOverlay extends JefOverlay {
 
     @Override protected int     getBaseWidth()    { return 180; }
     @Override public Position   getPosition()     { return JefConfig.feature.diana.lootOverlayPos; }
-    @Override public float      getScale()        { return JefConfig.feature.diana.overlayScale; }
-    @Override public int        getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.overlayBgColor); }
-    @Override public int        getCornerRadius() { return JefConfig.feature.diana.overlayCornerRadius; }
+    @Override public float      getScale()        { return JefConfig.feature.diana.lootScale; }
+    @Override public int        getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.lootBgColor); }
+    @Override public int        getCornerRadius() { return JefConfig.feature.diana.lootCornerRadius; }
 
     @SubscribeEvent
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {

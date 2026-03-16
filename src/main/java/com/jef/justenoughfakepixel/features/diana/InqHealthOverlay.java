@@ -24,9 +24,9 @@ public class InqHealthOverlay extends JefOverlay {
 
     @Override protected int     getBaseWidth()    { return 160; }
     @Override public Position   getPosition()     { return JefConfig.feature.diana.inqHealthPos; }
-    @Override public float      getScale()        { return JefConfig.feature.diana.overlayScale; }
-    @Override public int        getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.overlayBgColor); }
-    @Override public int        getCornerRadius() { return JefConfig.feature.diana.overlayCornerRadius; }
+    @Override public float      getScale()        { return JefConfig.feature.diana.inqScale; }
+    @Override public int        getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.inqBgColor); }
+    @Override public int        getCornerRadius() { return JefConfig.feature.diana.inqCornerRadius; }
     @Override protected boolean extraGuard()      { return DianaStats.getInstance().isTracking(); }
 
     @SubscribeEvent

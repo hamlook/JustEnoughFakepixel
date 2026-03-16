@@ -34,10 +34,12 @@ public class PerformanceHUD extends JefOverlay {
     private static int   tpsCount = 0;
     private static float currentTps = 20f;
 
+    private static final long PING_TIMEOUT_NS     = 5_000_000_000L;
+    private static final int  PING_INTERVAL_TICKS = 100;
+
     private static long   pingSentAt     = -1L;
     private static double pingMs         = -1;
     private static int    ticksSincePing = 0;
-    private static final int PING_INTERVAL_TICKS = 100;
 
     private static PerformanceHUD instance;
 
@@ -52,7 +54,6 @@ public class PerformanceHUD extends JefOverlay {
     @Override public float    getScale()        { return JefConfig.feature.misc.hudScale; }
     @Override public int      getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.misc.hudBgColor); }
     @Override public int      getCornerRadius() { return JefConfig.feature.misc.hudCornerRadius; }
-
 
     @SubscribeEvent
     public void onTimeUpdate(PacketReceiveTimeUpdateEvent event) {
@@ -79,6 +80,12 @@ public class PerformanceHUD extends JefOverlay {
         if (event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getMinecraft();
         if (mc.thePlayer == null || mc.thePlayer.sendQueue == null) return;
+
+        if (pingSentAt >= 0 && System.nanoTime() - pingSentAt > PING_TIMEOUT_NS) {
+            pingSentAt = -1L;
+            ticksSincePing = 0;
+        }
+
         if (pingSentAt >= 0) return;
         if (++ticksSincePing < PING_INTERVAL_TICKS) return;
         ticksSincePing = 0;
@@ -101,17 +108,16 @@ public class PerformanceHUD extends JefOverlay {
         render(false);
     }
 
-
     @Override
     public List<String> getLines(boolean preview) {
         if (JefConfig.feature == null) return new ArrayList<>();
         List<String> out = new ArrayList<>();
         if (JefConfig.feature.misc.hudShowFps)
-            out.add(C_LABEL + "FPS: "  + C_VAL + (preview ? 60           : Minecraft.getDebugFPS()));
+            out.add(C_LABEL + "FPS: "  + C_VAL + (preview ? 60     : Minecraft.getDebugFPS()));
         if (JefConfig.feature.misc.hudShowTps)
-            out.add(C_LABEL + "TPS: "  + C_VAL + (preview ? "20.0"       : String.format("%.1f", currentTps)));
+            out.add(C_LABEL + "TPS: "  + C_VAL + (preview ? "20.0" : String.format("%.1f", currentTps)));
         if (JefConfig.feature.misc.hudShowPing)
-            out.add(C_LABEL + "Ping: " + C_VAL + (preview ? "42ms"       : formatPing()));
+            out.add(C_LABEL + "Ping: " + C_VAL + (preview ? "42ms" : formatPing()));
         return out;
     }
 
@@ -123,7 +129,7 @@ public class PerformanceHUD extends JefOverlay {
         List<String> lines = getLines(preview);
         if (lines.isEmpty()) return;
 
-        Minecraft mc   = Minecraft.getMinecraft();
+        Minecraft mc    = Minecraft.getMinecraft();
         float     scale = getScale();
         boolean   vert  = JefConfig.feature.misc.hudVertical;
 
@@ -162,7 +168,6 @@ public class PerformanceHUD extends JefOverlay {
 
         GL11.glPopMatrix();
     }
-
 
     private static String formatPing() {
         return pingMs < 0 ? "..." : String.format("%.0fms", pingMs);
