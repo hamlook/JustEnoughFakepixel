@@ -52,7 +52,6 @@ public class GyroWandOverlay extends JefOverlay {
         if (JefConfig.feature == null || !JefConfig.feature.general.gyroWandTimer) return;
         if (OverlayUtils.shouldHide()) return;
         if (!isOnCooldown()) return;
-        if (!GyroWandHelper.isHoldingGyroStatic() && !JefConfig.feature.general.gyroWandTimerAlways) return;
         render(false);
     }
 }
