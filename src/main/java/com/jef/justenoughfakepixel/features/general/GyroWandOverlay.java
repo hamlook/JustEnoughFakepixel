@@ -3,14 +3,13 @@ package com.jef.justenoughfakepixel.features.general;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
-import com.jef.justenoughfakepixel.utils.OverlayUtils;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.Collections;
 import java.util.List;
 
+@RegisterEvents
 public class GyroWandOverlay extends JefOverlay {
 
     private static final long COOLDOWN_MS = 30_000L;
@@ -31,6 +30,12 @@ public class GyroWandOverlay extends JefOverlay {
     @Override public int      getCornerRadius() { return JefConfig.feature.general.gyroWandCornerRadius; }
 
     @Override
+    protected boolean isEnabled() {
+        return JefConfig.feature.general.gyroWandTimer
+                && (GyroWandHelper.isHoldingGyroStatic() || JefConfig.feature.general.gyroWandTimerAlways);
+    }
+
+    @Override
     public List<String> getLines(boolean preview) {
         if (preview) return Collections.singletonList("\u00a7cGyro: \u00a7f5s");
         if (!isOnCooldown()) return Collections.emptyList();
@@ -44,15 +49,5 @@ public class GyroWandOverlay extends JefOverlay {
 
     public boolean isOnCooldown() {
         return (System.currentTimeMillis() - lastUsedMs) < COOLDOWN_MS;
-    }
-
-    @SubscribeEvent
-    public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
-        if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
-        if (JefConfig.feature == null || !JefConfig.feature.general.gyroWandTimer) return;
-        if (OverlayUtils.shouldHide()) return;
-        if (!isOnCooldown()) return;
-        if (!GyroWandHelper.isHoldingGyroStatic() && !JefConfig.feature.general.gyroWandTimerAlways) return;
-        render(false);
     }
 }

@@ -3,13 +3,13 @@ package com.jef.justenoughfakepixel.features.diana;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@RegisterEvents
 public class DianaEventOverlay extends JefOverlay {
 
     private static DianaEventOverlay instance;
@@ -27,12 +27,9 @@ public class DianaEventOverlay extends JefOverlay {
     @Override public int        getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.eventBgColor); }
     @Override public int        getCornerRadius() { return JefConfig.feature.diana.eventCornerRadius; }
 
-    @SubscribeEvent
-    public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
-        if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
-        if (JefConfig.feature == null || !JefConfig.feature.diana.enabled
-                || !JefConfig.feature.diana.showEventOverlay) return;
-        render(false);
+    @Override
+    protected boolean isEnabled() {
+        return JefConfig.feature.diana.enabled && JefConfig.feature.diana.showEventOverlay;
     }
 
     @Override
@@ -65,20 +62,14 @@ public class DianaEventOverlay extends JefOverlay {
                 DianaStats.formatTime(d.activeTimeMs), DianaStats.formatTime(stats.getSessionTimeMs())));
         lines.add(String.format("\u00a7eBurrows: \u00a7f%d  \u00a77(\u00a7a%.1f\u00a77/hr)", d.totalBorrows, bph));
 
-        String lsSuffix = d.totalInqsLootshared > 0
-                ? String.format("  \u00a77[\u00a7bLS \u00a7f%d\u00a77]", d.totalInqsLootshared) : "";
         lines.add(String.format("\u00a7dInquisitor \u00a7d%s \u00a7f(%d)%s",
-                pct(d.totalMobs, stats, d.totalInqs), d.totalInqs, lsSuffix));
-        lines.add(String.format("\u00a76Minotaur \u00a7d%s \u00a7f(%d)",        pct(d.totalMobs, stats, d.totalMinotaurs),      d.totalMinotaurs));
-        lines.add(String.format("\u00a75Minos Champion \u00a7d%s \u00a7f(%d)",  pct(d.totalMobs, stats, d.totalChamps),         d.totalChamps));
-        lines.add(String.format("\u00a7fGaia Construct \u00a7d%s \u00a7f(%d)",  pct(d.totalMobs, stats, d.totalGaiaConstructs), d.totalGaiaConstructs));
-        lines.add(String.format("\u00a7aMinos Hunter \u00a7d%s \u00a7f(%d)",    pct(d.totalMobs, stats, d.totalMinosHunters),   d.totalMinosHunters));
-        lines.add(String.format("\u00a7eSiamese Lynx \u00a7d%s \u00a7f(%d)",    pct(d.totalMobs, stats, d.totalSiameseLynxes),  d.totalSiameseLynxes));
+                stats.formatMobPct(d.totalInqs), d.totalInqs, d.getLootsharedSuffix()));
+        lines.add(String.format("\u00a76Minotaur \u00a7d%s \u00a7f(%d)",       stats.formatMobPct(d.totalMinotaurs),      d.totalMinotaurs));
+        lines.add(String.format("\u00a75Minos Champion \u00a7d%s \u00a7f(%d)", stats.formatMobPct(d.totalChamps),         d.totalChamps));
+        lines.add(String.format("\u00a7fGaia Construct \u00a7d%s \u00a7f(%d)", stats.formatMobPct(d.totalGaiaConstructs), d.totalGaiaConstructs));
+        lines.add(String.format("\u00a7aMinos Hunter \u00a7d%s \u00a7f(%d)",   stats.formatMobPct(d.totalMinosHunters),   d.totalMinosHunters));
+        lines.add(String.format("\u00a7eSiamese Lynx \u00a7d%s \u00a7f(%d)",   stats.formatMobPct(d.totalSiameseLynxes),  d.totalSiameseLynxes));
 
         return lines;
-    }
-
-    private static String pct(int total, DianaStats stats, int count) {
-        return total > 0 ? String.format("%.2f%%", stats.getMobPercent(count)) : "-.--%%";
     }
 }

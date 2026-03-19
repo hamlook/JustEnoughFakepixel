@@ -4,15 +4,15 @@ import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
 import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.Collections;
 import java.util.List;
 
+@RegisterEvents
 public class FetchurOverlay extends JefOverlay {
 
     private static FetchurOverlay instance;
@@ -31,11 +31,9 @@ public class FetchurOverlay extends JefOverlay {
     @Override public int        getCornerRadius() { return JefConfig.feature.mining.overlayCornerRadius; }
     @Override protected boolean extraGuard()      { return ScoreboardUtils.isOnSkyblock() && !CustomScoreboard.isActive(); }
 
-    @SubscribeEvent
-    public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
-        if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
-        if (JefConfig.feature == null || !JefConfig.feature.mining.showFetchurOverlay) return;
-        render(false);
+    @Override
+    protected boolean isEnabled() {
+        return JefConfig.feature.mining.showFetchurOverlay;
     }
 
     @Override

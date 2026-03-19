@@ -1,5 +1,6 @@
 package com.jef.justenoughfakepixel.features.diana;
 
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ChatUtils;
 import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
 import net.minecraft.client.Minecraft;
@@ -11,6 +12,7 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@RegisterEvents
 public class DianaTracker {
 
     private static final Pattern BORROW_DIG     = Pattern.compile("You dug out a Griffin Borrow! \\(([1-4])/4\\)");

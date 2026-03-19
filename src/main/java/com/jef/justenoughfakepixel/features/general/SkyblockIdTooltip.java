@@ -1,6 +1,7 @@
 package com.jef.justenoughfakepixel.features.general;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ItemUtils;
 import com.jef.justenoughfakepixel.utils.RomanNumeralParser;
 import net.minecraft.client.Minecraft;
@@ -13,6 +14,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.Collection;
 
+@RegisterEvents
 public class SkyblockIdTooltip {
 
     private int tickCounter = 0;

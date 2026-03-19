@@ -4,6 +4,7 @@ import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.features.mining.FetchurHelper;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
 import com.jef.justenoughfakepixel.utils.OverlayUtils;
@@ -12,13 +13,12 @@ import com.jef.justenoughfakepixel.utils.TablistParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
 import java.util.regex.Pattern;
 
+@RegisterEvents
 public class CustomScoreboard extends JefOverlay {
 
     private static final int PAD_X       = 4;
@@ -53,17 +53,17 @@ public class CustomScoreboard extends JefOverlay {
     private static final String LOC_SYMBOL_NORMAL = "\u23E3";
     private static final String LOC_SYMBOL_RIFT   = "\u0444";
 
-    private static final Pattern SERVER_PATTERN           = Pattern.compile("\\s*\\d{2}/\\d{2}/\\d{2}.*");
-    private static final Pattern SEASON_PATTERN           = Pattern.compile("\\s*(?:(?:Late|Early) )?(?:Spring|Summer|Autumn|Winter) \\d+.*");
-    private static final Pattern TIME_PATTERN             = Pattern.compile("\\s*\\d+:\\d+(?:am|pm).*");
-    private static final Pattern PROFILE_TYPE_PATTERN     = Pattern.compile("(?:Ironman|Stranded|Bingo|Classic)");
-    private static final Pattern PURSE_PATTERN            = Pattern.compile("(?:Piggy|Purse): [\\d,.]+");
-    private static final Pattern BANK_PATTERN             = Pattern.compile("Bank: .+");
-    private static final Pattern BITS_PATTERN             = Pattern.compile("Bits: [\\d,.]+");
-    private static final Pattern EVENT_PATTERN            = Pattern.compile("(?:Fishing Festival|Mining Fiesta|Spooky Festival|Season of Jerry|Traveling Zoo|New Year Celebration|Election|Fallen Star|Festival of Gifts).*");
-    private static final Pattern SLAYER_PATTERN           = Pattern.compile("Slayer Quest");
-    private static final Pattern COOKIE_SUPPRESS_PATTERN  = Pattern.compile("Cookie Buff.*|\\d+d\\s+\\d+h.*");
-    private static final Pattern WEBSITE_PATTERN          = Pattern.compile(".*fakepixel.*");
+    private static final Pattern SERVER_PATTERN          = Pattern.compile("\\s*\\d{2}/\\d{2}/\\d{2}.*");
+    private static final Pattern SEASON_PATTERN          = Pattern.compile("\\s*(?:(?:Late|Early) )?(?:Spring|Summer|Autumn|Winter) \\d+.*");
+    private static final Pattern TIME_PATTERN            = Pattern.compile("\\s*\\d+:\\d+(?:am|pm).*");
+    private static final Pattern PROFILE_TYPE_PATTERN    = Pattern.compile("(?:Ironman|Stranded|Bingo|Classic)");
+    private static final Pattern PURSE_PATTERN           = Pattern.compile("(?:Piggy|Purse): [\\d,.]+");
+    private static final Pattern BANK_PATTERN            = Pattern.compile("Bank: .+");
+    private static final Pattern BITS_PATTERN            = Pattern.compile("Bits: [\\d,.]+");
+    private static final Pattern EVENT_PATTERN           = Pattern.compile("(?:Fishing Festival|Mining Fiesta|Spooky Festival|Season of Jerry|Traveling Zoo|New Year Celebration|Election|Fallen Star|Festival of Gifts).*");
+    private static final Pattern SLAYER_PATTERN          = Pattern.compile("Slayer Quest");
+    private static final Pattern COOKIE_SUPPRESS_PATTERN = Pattern.compile("Cookie Buff.*|\\d+d\\s+\\d+h.*");
+    private static final Pattern WEBSITE_PATTERN         = Pattern.compile(".*fakepixel.*");
 
     private static CustomScoreboard instance;
 
@@ -80,18 +80,15 @@ public class CustomScoreboard extends JefOverlay {
                 && JefConfig.feature.scoreboard.enabled;
     }
 
-    @Override public Position getPosition()    { return JefConfig.feature.scoreboard.position; }
-    @Override public float   getScale()        { return JefConfig.feature.scoreboard.scale; }
-    @Override public int     getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.scoreboard.scoreboardBg); }
-    @Override public int     getCornerRadius() { return (int) JefConfig.feature.scoreboard.cornerRadius; }
-    @Override protected boolean extraGuard()   { return isActive(); }
+    @Override public Position getPosition()     { return JefConfig.feature.scoreboard.position; }
+    @Override public float    getScale()        { return JefConfig.feature.scoreboard.scale; }
+    @Override public int      getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.scoreboard.scoreboardBg); }
+    @Override public int      getCornerRadius() { return (int) JefConfig.feature.scoreboard.cornerRadius; }
+    @Override protected boolean extraGuard()    { return isActive(); }
 
-    @SubscribeEvent
-    public void onRender(RenderGameOverlayEvent.Post event) {
-        if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
-        if (Minecraft.getMinecraft().gameSettings.showDebugInfo) return;
-        if (JefConfig.feature.scoreboard.hideOnTab && OverlayUtils.shouldHide()) return;
-        render(false);
+    @Override
+    protected boolean isEnabled() {
+        return isActive() && !Minecraft.getMinecraft().gameSettings.showDebugInfo;
     }
 
     private static List<Integer> getLineOrder() {
@@ -203,7 +200,7 @@ public class CustomScoreboard extends JefOverlay {
         lines.add("\u00A76\u00A7l" + title);
 
         List<Integer> lineRawIndex = new ArrayList<>();
-        lineRawIndex.add(-1); // title
+        lineRawIndex.add(-1);
 
         for (int id : getLineOrder()) {
             switch (id) {
@@ -298,7 +295,6 @@ public class CustomScoreboard extends JefOverlay {
             if (c.isEmpty()) continue;
             if (WEBSITE_PATTERN.matcher(c).find()) continue;
 
-            // Find the best insertion point: after the last output line whose raw index is <= ri
             int insertAt = lines.size();
             for (int j = lineRawIndex.size() - 1; j >= 0; j--) {
                 if (lineRawIndex.get(j) != -1 && lineRawIndex.get(j) <= ri) {
@@ -318,6 +314,7 @@ public class CustomScoreboard extends JefOverlay {
     @Override
     public void render(boolean preview) {
         if (!preview && !extraGuard()) return;
+        if (!preview && JefConfig.feature.scoreboard.hideOnTab && OverlayUtils.shouldHide()) return;
 
         List<String> lines = getLines(preview);
         if (lines.isEmpty()) return;

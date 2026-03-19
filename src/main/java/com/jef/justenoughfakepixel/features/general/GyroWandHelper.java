@@ -2,6 +2,7 @@ package com.jef.justenoughfakepixel.features.general;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.utils.RenderUtils;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ChatUtils;
 import com.jef.justenoughfakepixel.utils.ItemUtils;
 import net.minecraft.client.Minecraft;
@@ -14,6 +15,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
+@RegisterEvents
 public class GyroWandHelper {
 
     private static final String GYRO_ID     = "GYROKINETIC_WAND";

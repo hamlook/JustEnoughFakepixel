@@ -3,6 +3,7 @@ package com.jef.justenoughfakepixel.features.misc;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ItemUtils;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
 import com.jef.justenoughfakepixel.utils.OverlayUtils;
@@ -13,14 +14,13 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
 import java.util.Collections;
 import java.util.List;
 
+@RegisterEvents
 public class CurrentPetOverlay extends JefOverlay {
 
     private static final int SKULL_SIZE = 16;
@@ -33,7 +33,6 @@ public class CurrentPetOverlay extends JefOverlay {
         instance = this;
     }
 
-
     public static CurrentPetOverlay getInstance() { return instance; }
 
     @Override public Position getPosition()     { return JefConfig.feature.misc.currentPetPos; }
@@ -41,13 +40,9 @@ public class CurrentPetOverlay extends JefOverlay {
     @Override public int      getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.misc.currentPetBgColor); }
     @Override public int      getCornerRadius() { return JefConfig.feature.misc.currentPetCornerRadius; }
 
-    @SubscribeEvent
-    public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
-        if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
-        if (JefConfig.feature == null || !JefConfig.feature.misc.showCurrentPet) return;
-        if (!ScoreboardUtils.isOnSkyblock()) return;
-        if (OverlayUtils.shouldHide()) return;
-        render(false);
+    @Override
+    protected boolean isEnabled() {
+        return JefConfig.feature.misc.showCurrentPet && ScoreboardUtils.isOnSkyblock();
     }
 
     @Override
@@ -64,7 +59,6 @@ public class CurrentPetOverlay extends JefOverlay {
 
     @Override
     public void render(boolean preview) {
-        if (JefConfig.feature == null) return;
         if (!preview && OverlayUtils.shouldHide()) return;
 
         Minecraft mc = Minecraft.getMinecraft();
@@ -112,6 +106,7 @@ public class CurrentPetOverlay extends JefOverlay {
             RenderHelper.enableGUIStandardItemLighting();
             GL11.glEnable(GL12.GL_RESCALE_NORMAL);
             mc.getRenderItem().renderItemAndEffectIntoGUI(skullItem, 0, 0);
+            GL11.glDisable(GL12.GL_RESCALE_NORMAL);
             RenderHelper.disableStandardItemLighting();
             GlStateManager.disableLighting();
         } else {

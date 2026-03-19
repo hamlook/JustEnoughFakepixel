@@ -1,5 +1,6 @@
 package com.jef.justenoughfakepixel.core.config.command;
 
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
@@ -8,6 +9,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.Locale;
 
+@RegisterEvents
 public class SimpleCommandFilter {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

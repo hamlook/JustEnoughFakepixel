@@ -1,20 +1,19 @@
 package com.jef.justenoughfakepixel.features.dungeons;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
 import com.jef.justenoughfakepixel.utils.ChatUtils;
 import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@RegisterEvents
 public class DungeonStats extends JefOverlay {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
@@ -42,25 +42,25 @@ public class DungeonStats extends JefOverlay {
             {85,221, 21},
     };
 
-    private static final Pattern BLOOD_DOOR   = Pattern.compile("The BLOOD DOOR has been opened!");
-    private static final Pattern RUN_FAILED   = Pattern.compile("Warning! This dungeon will close in 10s");
-    private static final Pattern BOSS_SLAIN   = Pattern.compile("Defeated (.+) in \\d");
-    private static final Pattern SCORE_LINE   = Pattern.compile("Team Score: (\\d+) \\((.{1,2})\\) *(\\(NEW RECORD!\\))?");
-    private static final Pattern XP_LINE      = Pattern.compile("(\\+[\\d,.]+\\s?\\w+ Experience)(?:\\(.+\\))?");
-    private static final Pattern FLOOR_PAT    = Pattern.compile("\\(([EFM][\\d])\\)");
-    private static final Pattern TIME_ELAPSED = Pattern.compile("Time Elapsed: (\\d+)");
+    private static final Pattern BLOOD_DOOR    = Pattern.compile("The BLOOD DOOR has been opened!");
+    private static final Pattern RUN_FAILED    = Pattern.compile("Warning! This dungeon will close in 10s");
+    private static final Pattern BOSS_SLAIN    = Pattern.compile("Defeated (.+) in \\d");
+    private static final Pattern SCORE_LINE    = Pattern.compile("Team Score: (\\d+) \\((.{1,2})\\) *(\\(NEW RECORD!\\))?");
+    private static final Pattern XP_LINE       = Pattern.compile("(\\+[\\d,.]+\\s?\\w+ Experience)(?:\\(.+\\))?");
+    private static final Pattern FLOOR_PAT     = Pattern.compile("\\(([EFM][\\d])\\)");
+    private static final Pattern TIME_ELAPSED  = Pattern.compile("Time Elapsed: (\\d+)");
 
-    private static final Pattern MAXOR_START   = Pattern.compile("BOSS.*Maxor.*WELL WELL WELL");
-    private static final Pattern MAXOR_END     = Pattern.compile("BOSS.*Maxor.*TOO YOUNG TO DIE");
-    private static final Pattern STORM_START   = Pattern.compile("BOSS.*Storm.*Pathetic Maxor");
-    private static final Pattern STORM_END     = Pattern.compile("BOSS.*Storm.*At least my son");
+    private static final Pattern MAXOR_START    = Pattern.compile("BOSS.*Maxor.*WELL WELL WELL");
+    private static final Pattern MAXOR_END      = Pattern.compile("BOSS.*Maxor.*TOO YOUNG TO DIE");
+    private static final Pattern STORM_START    = Pattern.compile("BOSS.*Storm.*Pathetic Maxor");
+    private static final Pattern STORM_END      = Pattern.compile("BOSS.*Storm.*At least my son");
     private static final Pattern TERMINAL_START = Pattern.compile("BOSS.*Goldor.*Who dares trespass");
-    private static final Pattern GOLDOR_FIGHT  = Pattern.compile("The Core entrance is opening");
-    private static final Pattern GOLDOR_END    = Pattern.compile("BOSS.*Goldor.*You have done it");
-    private static final Pattern NECRON_START  = Pattern.compile("BOSS.*Necron.*Finally, I heard so much");
-    private static final Pattern NECRON_END    = Pattern.compile("BOSS.*Necron.*The Catacombs.*are no more");
-    private static final Pattern WITHER_START  = Pattern.compile("BOSS.*(?:WITHER KING.*You\\.\\. again|The Wither King.*Ohh)");
-    private static final Pattern WITHER_END    = Pattern.compile("BOSS.*WITHER KING.*My strengths are depleting");
+    private static final Pattern GOLDOR_FIGHT   = Pattern.compile("The Core entrance is opening");
+    private static final Pattern GOLDOR_END     = Pattern.compile("BOSS.*Goldor.*You have done it");
+    private static final Pattern NECRON_START   = Pattern.compile("BOSS.*Necron.*Finally, I heard so much");
+    private static final Pattern NECRON_END     = Pattern.compile("BOSS.*Necron.*The Catacombs.*are no more");
+    private static final Pattern WITHER_START   = Pattern.compile("BOSS.*(?:WITHER KING.*You\\.\\.\\. again|The Wither King.*Ohh)");
+    private static final Pattern WITHER_END     = Pattern.compile("BOSS.*WITHER KING.*My strengths are depleting");
 
     private static final Pattern TERRA_START = Pattern.compile("BOSS.*Sadan.*I am the bridge between this realm");
     private static final Pattern TERRA_END   = Pattern.compile("BOSS.*Sadan.*ENOUGH!");
@@ -103,71 +103,34 @@ public class DungeonStats extends JefOverlay {
     private long necronStart   = 0, necronEnd   = 0;
     private long witherStart   = 0, witherEnd   = 0;
 
-    private long terraStart    = 0, terraEnd    = 0;
-    private long giantsStart   = 0, giantsEnd   = 0;
-    private long sadanStart    = 0, sadanEnd    = 0;
+    private long terraStart  = 0, terraEnd  = 0;
+    private long giantsStart = 0, giantsEnd = 0;
+    private long sadanStart  = 0, sadanEnd  = 0;
 
     private int     lastClearedPct  = 0;
     private int     tickCounter     = 0;
     private final EndStats endStats = new EndStats();
 
     private static DungeonStats instance;
+
     public DungeonStats() {
         super(OVERLAY_WIDTH, OVERLAY_HEIGHT);
         instance = this;
     }
+
     public static DungeonStats getInstance() { return instance; }
 
-
-    @Override public Position getPosition()    { return JefConfig.feature.dungeons.statsPos; }
-    @Override public float    getScale()       { return JefConfig.feature.dungeons.statsScale; }
-    @Override public int      getBgColor()      { return com.jef.justenoughfakepixel.core.config.editors.ChromaColour.specialToChromaRGB(JefConfig.feature.dungeons.statsBgColor); }
+    @Override public Position getPosition()     { return JefConfig.feature.dungeons.statsPos; }
+    @Override public float    getScale()        { return JefConfig.feature.dungeons.statsScale; }
+    @Override public int      getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.dungeons.statsBgColor); }
     @Override public int      getCornerRadius() { return JefConfig.feature.dungeons.statsCornerRadius; }
-    @Override protected boolean extraGuard()   { return inDungeon && runStart != 0; }
+    @Override protected int   getBaseWidth()    { return 60; }
+    @Override protected boolean extraGuard()    { return inDungeon && runStart != 0; }
 
     @Override
-    public void render(boolean preview) {
-        if (JefConfig.feature == null) return;
-        if (!preview && (shouldHideOverlay())) return;
-
-        List<String> lines = getLines(preview);
-        if (lines == null || lines.isEmpty()) return;
-
-        float scale = getScale();
-        int w = 0;
-        for (String l : lines) w = Math.max(w, mc.fontRendererObj.getStringWidth(l));
-        w = Math.max(w + PADDING * 2, 60);
-        int h = lines.size() * LINE_HEIGHT + PADDING * 2;
-        lastW = w; lastH = h;
-
-        ScaledResolution sr = new ScaledResolution(mc);
-        Position pos        = getPosition();
-        int x               = pos.getAbsX(sr, (int)(w * scale));
-        int y               = pos.getAbsY(sr, (int)(h * scale));
-        if (pos.isCenterX()) x -= (int)(w * scale / 2);
-        if (pos.isCenterY()) y -= (int)(h * scale / 2);
-
-        GL11.glPushMatrix();
-        GL11.glTranslatef(x, y, 0);
-        GL11.glScalef(scale, scale, 1f);
-
-        int bgColor = getBgColor();
-        if ((bgColor >>> 24) != 0)
-            drawRoundedRect(-PADDING, -PADDING, w, h - PADDING, getCornerRadius(), bgColor);
-
-        int dy = 0;
-        for (String line : lines) {
-            mc.fontRendererObj.drawStringWithShadow(line, 0, dy, 0xFFFFFF);
-            dy += LINE_HEIGHT;
-        }
-
-        GL11.glPopMatrix();
+    protected boolean isEnabled() {
+        return JefConfig.feature.dungeons.dungeonStats;
     }
-
-    private boolean shouldHideOverlay() {
-        return com.jef.justenoughfakepixel.utils.OverlayUtils.shouldHide() || !extraGuard();
-    }
-
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
@@ -323,17 +286,7 @@ public class DungeonStats extends JefOverlay {
     }
 
     @SubscribeEvent
-    public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
-        if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
-        if (JefConfig.feature == null || !JefConfig.feature.dungeons.dungeonStats) return;
-        if (!inDungeon || runStart == 0) return;
-        if (com.jef.justenoughfakepixel.utils.OverlayUtils.shouldHide()) return;
-        render(false);
-    }
-
-    @SubscribeEvent
     public void onWorldUnload(WorldEvent.Unload event) { reset(); }
-
 
     @Override
     public List<String> getLines(boolean preview) {
@@ -355,14 +308,9 @@ public class DungeonStats extends JefOverlay {
         long boss    = s != null ? s.bossTime     : 0;
         long dead    = s != null ? s.bossDeadTime : 0;
 
-        if (preview || now > 0)
-            out.add(line(C_CLEAR, "Clear", cleared, now, preview, "3:10.500"));
-
-        if (preview || now > 0)
-            out.add(line(C_BLOOD, "Blood Rush", blood, now, preview, "3:45.200"));
-
-        if (preview || blood > 0)
-            out.add(line(C_ENTRY, "Boss Entry", boss, now, preview, "3:55.100"));
+        if (preview || now > 0)   out.add(line(C_CLEAR, "Clear",      cleared, now, preview, "3:10.500"));
+        if (preview || now > 0)   out.add(line(C_BLOOD, "Blood Rush", blood,   now, preview, "3:45.200"));
+        if (preview || blood > 0) out.add(line(C_ENTRY, "Boss Entry", boss,    now, preview, "3:55.100"));
 
         if (preview || boss > 0) {
             long bossDur = dead > 0 ? dead - boss : (boss > 0 ? now - boss : 0);
@@ -373,11 +321,11 @@ public class DungeonStats extends JefOverlay {
         }
 
         if (preview || f.isF7orM7()) {
-            addPhase(out, C_MAXOR,  "Maxor",      s != null ? s.maxorStart    : 0, s != null ? s.maxorEnd    : 0, now, preview, "0:18.000");
-            addPhase(out, C_STORM,  "Storm",       s != null ? s.stormStart   : 0, s != null ? s.stormEnd    : 0, now, preview, "0:12.000");
-            addPhase(out, C_GOLDOR, "Terminals",   s != null ? s.terminalStart: 0, s != null ? s.goldorFight : 0, now, preview, "0:20.000");
-            addPhase(out, C_GOLDOR, "Goldor",      s != null ? s.goldorFight  : 0, s != null ? s.goldorEnd   : 0, now, preview, "0:08.000");
-            addPhase(out, C_NECRON, "Necron",      s != null ? s.necronStart  : 0, s != null ? s.necronEnd   : 0, now, preview, "0:05.000");
+            addPhase(out, C_MAXOR,  "Maxor",      s != null ? s.maxorStart     : 0, s != null ? s.maxorEnd     : 0, now, preview, "0:18.000");
+            addPhase(out, C_STORM,  "Storm",       s != null ? s.stormStart    : 0, s != null ? s.stormEnd     : 0, now, preview, "0:12.000");
+            addPhase(out, C_GOLDOR, "Terminals",   s != null ? s.terminalStart : 0, s != null ? s.goldorFight  : 0, now, preview, "0:20.000");
+            addPhase(out, C_GOLDOR, "Goldor",      s != null ? s.goldorFight   : 0, s != null ? s.goldorEnd    : 0, now, preview, "0:08.000");
+            addPhase(out, C_NECRON, "Necron",      s != null ? s.necronStart   : 0, s != null ? s.necronEnd    : 0, now, preview, "0:05.000");
             if (preview || mm)
                 addPhase(out, C_WITHER, "Wither King", s != null ? s.witherStart : 0, s != null ? s.witherEnd : 0, now, preview, "0:04.000");
         }
@@ -391,7 +339,6 @@ public class DungeonStats extends JefOverlay {
         out.removeIf(l -> l == null);
         return out;
     }
-
 
     private static String line(String color, String label, long locked, long now, boolean preview, String previewVal) {
         if (preview)    return color + label + " took: " + C_VAL + previewVal;
@@ -408,7 +355,7 @@ public class DungeonStats extends JefOverlay {
 
     private void printEndStats() {
         String floor = currentFloor == DungeonFloor.NONE ? "?" : currentFloor.name();
-        String sep   = EnumChatFormatting.DARK_GRAY + "――――――――――――――――――――";
+        String sep   = EnumChatFormatting.DARK_GRAY + "————————————————————";
         String fc    = currentFloor.isMasterMode() ? C_FLOOR_MM : C_FLOOR_NM;
 
         send(sep);
@@ -436,14 +383,14 @@ public class DungeonStats extends JefOverlay {
         }
 
         if (currentFloor.isF7orM7()) {
-            if (maxorEnd     > 0) send(C_MAXOR  + "Maxor took: "               + C_VAL + fmt(maxorEnd     - maxorStart)    + pbTag(floor + "_p1"));
-            if (stormEnd     > 0) send(C_STORM  + "Storm took: "               + C_VAL + fmt(stormEnd     - stormStart)    + pbTag(floor + "_p2"));
-            if (goldorFight  > 0) send(C_GOLDOR + "Terminals took: "           + C_VAL + fmt(goldorFight  - terminalStart));
-            if (goldorEnd    > 0) send(C_GOLDOR + "Goldor took: "              + C_VAL + fmt(goldorEnd    - goldorFight));
+            if (maxorEnd      > 0) send(C_MAXOR  + "Maxor took: "               + C_VAL + fmt(maxorEnd     - maxorStart)    + pbTag(floor + "_p1"));
+            if (stormEnd      > 0) send(C_STORM  + "Storm took: "               + C_VAL + fmt(stormEnd     - stormStart)    + pbTag(floor + "_p2"));
+            if (goldorFight   > 0) send(C_GOLDOR + "Terminals took: "           + C_VAL + fmt(goldorFight  - terminalStart));
+            if (goldorEnd     > 0) send(C_GOLDOR + "Goldor took: "              + C_VAL + fmt(goldorEnd    - goldorFight));
             if (terminalStart > 0 && goldorEnd > 0)
                 send(C_GOLDOR + "P3 (Terminal+Goldor): "     + C_VAL + fmt(goldorEnd    - terminalStart)  + pbTag(floor + "_p3"));
-            if (necronEnd    > 0) send(C_NECRON + "Necron took: "              + C_VAL + fmt(necronEnd    - necronStart)    + pbTag(floor + "_p4"));
-            if (witherEnd    > 0) send(C_WITHER + "Wither King took: "         + C_VAL + fmt(witherEnd    - witherStart)    + pbTag(floor + "_p5"));
+            if (necronEnd     > 0) send(C_NECRON + "Necron took: "              + C_VAL + fmt(necronEnd    - necronStart)    + pbTag(floor + "_p4"));
+            if (witherEnd     > 0) send(C_WITHER + "Wither King took: "         + C_VAL + fmt(witherEnd    - witherStart)    + pbTag(floor + "_p5"));
         }
         send(sep);
     }
@@ -578,9 +525,6 @@ public class DungeonStats extends JefOverlay {
         String bossName, score, grade;
         boolean scorePB;
         final List<String> xp = new ArrayList<>();
-        void reset() {
-            bossName = score = grade = null; scorePB = false;
-            xp.clear();
-        }
+        void reset() { bossName = score = grade = null; scorePB = false; xp.clear(); }
     }
 }

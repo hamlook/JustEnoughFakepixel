@@ -3,6 +3,7 @@
 package com.jef.justenoughfakepixel.repo;
 
 import com.jef.justenoughfakepixel.JefMod;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.repo.data.UpdateData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
@@ -10,6 +11,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+@RegisterEvents
 public class VersionChecker {
 
     private static final UpdateData FALLBACK = new UpdateData();

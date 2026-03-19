@@ -2,6 +2,7 @@ package com.jef.justenoughfakepixel.features.waypoints;
 
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
@@ -14,6 +15,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
+@RegisterEvents
 public class WaypointRenderer {
 
     private static final Minecraft mc = Minecraft.getMinecraft();
@@ -121,6 +123,7 @@ public class WaypointRenderer {
         GlStateManager.enableLighting();
         GlStateManager.enableCull();
         GlStateManager.disableBlend();
+        GL11.glLineWidth(1.0f);
         GlStateManager.color(1f, 1f, 1f, 1f);
     }
 
@@ -175,8 +178,8 @@ public class WaypointRenderer {
 
     private void drawNormalLabels(WaypointState state) {
         WaypointPoint prev = state.getPrev();
-        WaypointPoint cur = state.getCurrent();
-        WaypointPoint nxt = state.getNext();
+        WaypointPoint cur  = state.getCurrent();
+        WaypointPoint nxt  = state.getNext();
 
         if (prev != null && prev != cur)
             drawLabel(prev.x + 0.5, prev.y + 2.2, prev.z + 0.5, "\u00a77" + safeName(prev, "Prev"));
@@ -217,7 +220,6 @@ public class WaypointRenderer {
         int ri = (int)(col[0] * 255), gi = (int)(col[1] * 255),
                 bi = (int)(col[2] * 255), ai = (int)(col[3] * 255);
 
-        // Interpolated eye position in world space — moves smoothly and ignores bob
         Vec3 eyes = mc.thePlayer.getPositionEyes(event.partialTicks);
 
         GlStateManager.disableTexture2D();
@@ -237,6 +239,7 @@ public class WaypointRenderer {
         GlStateManager.enableTexture2D();
         GlStateManager.enableDepth();
         GL11.glDepthMask(true);
+        GL11.glLineWidth(1.0f);
     }
 
     private void drawLabel(double wx, double wy, double wz, String text) {
@@ -250,7 +253,6 @@ public class WaypointRenderer {
         double renderDist = Math.min(dist, 50.0);
         float scale = Math.max(0.025f, (float)(renderDist / 300.0));
 
-        // Strip formatting codes so the config colour takes effect instead
         String nameStr = net.minecraft.util.StringUtils.stripControlCodes(text);
         String distStr = (int)Math.round(dist) + "m";
         String separator = " ";
@@ -268,9 +270,7 @@ public class WaypointRenderer {
 
         GlStateManager.color(1f, 1f, 1f, 1f);
         float startX = -totalW / 2f;
-        // Waypoint name — uses labelColour config
         mc.fontRendererObj.drawStringWithShadow(nameStr, startX, 0f, labelColour());
-        // Distance — uses distanceLabelColour config
         mc.fontRendererObj.drawStringWithShadow(distStr, startX + nameW + sepW, 0f, distanceLabelColour());
 
         GL11.glPopMatrix();

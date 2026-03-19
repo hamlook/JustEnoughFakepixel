@@ -3,21 +3,22 @@ package com.jef.justenoughfakepixel.features.scoreboard;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.init.RegisterInstance;
+import com.jef.justenoughfakepixel.utils.ColorUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagList;
-import com.jef.justenoughfakepixel.utils.ColorUtils;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.io.*;
 
-
 public class MaxwellPowerSync {
 
+    @RegisterInstance
     private static MaxwellPowerSync INSTANCE;
 
     public static MaxwellPowerSync getInstance() {
@@ -85,7 +86,7 @@ public class MaxwellPowerSync {
                 String name = ColorUtils.stripColor(item.getDisplayName()).trim();
                 if (!name.isEmpty() && !name.equals(data.power)) {
                     data.power = name;
-                    save(); // only save when value actually changes
+                    save();
                 }
                 return;
             }
@@ -105,5 +106,4 @@ public class MaxwellPowerSync {
         } catch (Exception ignored) {}
         return false;
     }
-
 }

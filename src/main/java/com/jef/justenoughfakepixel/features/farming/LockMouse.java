@@ -2,12 +2,14 @@ package com.jef.justenoughfakepixel.features.farming;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.utils.KeybindHelper;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+@RegisterEvents
 public class LockMouse {
 
     private static final Minecraft mc = Minecraft.getMinecraft();

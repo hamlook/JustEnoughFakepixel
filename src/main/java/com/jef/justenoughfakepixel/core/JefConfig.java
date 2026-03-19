@@ -16,6 +16,7 @@ import com.jef.justenoughfakepixel.features.misc.CurrentPetOverlay;
 import com.jef.justenoughfakepixel.features.misc.PerformanceHUD;
 import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
 import com.jef.justenoughfakepixel.features.waypoints.WaypointGroupGui;
+import com.jef.justenoughfakepixel.init.RegisterKeybind;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.settings.KeyBinding;
@@ -41,6 +42,7 @@ public class JefConfig {
             .excludeFieldsWithoutExposeAnnotation()
             .create();
 
+    @RegisterKeybind
     public static final KeyBinding openGuiKey = new KeyBinding(
             "Open JEF GUI",
             Keyboard.KEY_P,
@@ -56,7 +58,6 @@ public class JefConfig {
         if (registered) return;
         init();
         MinecraftForge.EVENT_BUS.register(new JefConfig());
-        ClientRegistry.registerKeyBinding(openGuiKey);
         ClientCommandHandler.instance.registerCommand(new JefCommand());
         registered = true;
     }

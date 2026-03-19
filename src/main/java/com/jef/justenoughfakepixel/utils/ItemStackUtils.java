@@ -4,6 +4,7 @@ package com.jef.justenoughfakepixel.utils;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.events.RenderItemOverlayEvent;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
 import com.jef.justenoughfakepixel.utils.ItemUtils;
 import com.jef.justenoughfakepixel.utils.RomanNumeralParser;
@@ -15,6 +16,7 @@ import net.minecraft.inventory.ContainerChest;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+@RegisterEvents
 public class ItemStackUtils {
 
     private static final Minecraft mc = Minecraft.getMinecraft();

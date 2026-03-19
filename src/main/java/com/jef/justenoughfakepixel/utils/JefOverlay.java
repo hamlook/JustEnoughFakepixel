@@ -1,13 +1,15 @@
 package com.jef.justenoughfakepixel.utils;
 
+import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
-
 
 public abstract class JefOverlay {
 
@@ -28,12 +30,18 @@ public abstract class JefOverlay {
     public abstract List<String> getLines(boolean preview);
     public abstract Position     getPosition();
     public abstract float        getScale();
-
-    public abstract int getBgColor();
-
-    public abstract int getCornerRadius();
+    public abstract int          getBgColor();
+    public abstract int          getCornerRadius();
+    protected abstract boolean   isEnabled();
 
     protected boolean extraGuard() { return true; }
+
+    @SubscribeEvent
+    public final void onRenderOverlay(RenderGameOverlayEvent.Post event) {
+        if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
+        if (JefConfig.feature == null || !isEnabled()) return;
+        render(false);
+    }
 
     public void render(boolean preview) {
         if (!preview && (OverlayUtils.shouldHide() || !extraGuard())) return;
@@ -77,7 +85,6 @@ public abstract class JefOverlay {
 
     protected int getBaseWidth() { return 20; }
 
-
     protected static void drawRoundedRect(int x, int y, int w, int h, int r, int color) {
         r = Math.min(r, Math.min(w - x, h - y) / 2);
         if (r <= 0) { Gui.drawRect(x, y, w, h, color); return; }
@@ -88,10 +95,10 @@ public abstract class JefOverlay {
 
         for (int i = 0; i < r; i++) {
             int cut = (int) Math.round(r - Math.sqrt(Math.max(0.0, (double) r * r - (double)(r - i - 1) * (r - i - 1))));
-            Gui.drawRect(x + i,         y + cut,   x + i + 1,   y + r, color);
-            Gui.drawRect(w - i - 1,     y + cut,   w - i,       y + r, color);
-            Gui.drawRect(x + i,         h - r,     x + i + 1,   h - cut, color);
-            Gui.drawRect(w - i - 1,     h - r,     w - i,       h - cut, color);
+            Gui.drawRect(x + i,     y + cut, x + i + 1, y + r,   color);
+            Gui.drawRect(w - i - 1, y + cut, w - i,     y + r,   color);
+            Gui.drawRect(x + i,     h - r,   x + i + 1, h - cut, color);
+            Gui.drawRect(w - i - 1, h - r,   w - i,     h - cut, color);
         }
     }
 }

@@ -3,14 +3,14 @@ package com.jef.justenoughfakepixel.features.diana;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@RegisterEvents
 public class DianaMobHealthOverlay extends JefOverlay {
 
     private static DianaMobHealthOverlay instance;
@@ -27,14 +27,10 @@ public class DianaMobHealthOverlay extends JefOverlay {
     @Override public float      getScale()        { return JefConfig.feature.diana.mobScale; }
     @Override public int        getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.mobBgColor); }
     @Override public int        getCornerRadius() { return JefConfig.feature.diana.mobCornerRadius; }
-    @Override protected boolean extraGuard()      { return true; }
 
-    @SubscribeEvent
-    public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
-        if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
-        if (JefConfig.feature == null || !JefConfig.feature.diana.enabled
-                || !JefConfig.feature.diana.showDianaMobHealthOverlay) return;
-        render(false);
+    @Override
+    protected boolean isEnabled() {
+        return JefConfig.feature.diana.enabled && JefConfig.feature.diana.showDianaMobHealthOverlay;
     }
 
     @Override

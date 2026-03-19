@@ -1,6 +1,7 @@
 package com.jef.justenoughfakepixel.features.dungeons;
 
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
 import com.jef.justenoughfakepixel.events.RenderEntityModelEvent;
 import com.jef.justenoughfakepixel.utils.EntityHighlightUtils;
@@ -24,6 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+@RegisterEvents
 public class BloodMobDisplay {
 
     // Matches armor stand name only if it contains a blood room mob name

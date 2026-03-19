@@ -2,6 +2,7 @@ package com.jef.justenoughfakepixel.utils;
 
 import com.jef.justenoughfakepixel.features.diana.DianaTracker;
 import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
@@ -11,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@RegisterEvents
 public class PartyCommands {
 
     private static final long HELP_COOLDOWN_MS = 10_000L;

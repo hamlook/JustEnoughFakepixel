@@ -1,5 +1,6 @@
 package com.jef.justenoughfakepixel.utils;
 
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
@@ -16,6 +17,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import java.util.Comparator;
 import java.util.List;
 
+@RegisterEvents
 public class TablistParser {
 
     private static ScoreboardUtils.Location currentLocation = ScoreboardUtils.Location.NONE;

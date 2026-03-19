@@ -1,6 +1,7 @@
 package com.jef.justenoughfakepixel.features.diana;
 
 import com.jef.justenoughfakepixel.core.config.command.SimpleCommand;
+import com.jef.justenoughfakepixel.init.RegisterCommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
@@ -11,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 
+@RegisterCommand
 public class DianaCommand extends SimpleCommand {
 
     private static final String PREFIX = EnumChatFormatting.DARK_AQUA + "[Diana] " + EnumChatFormatting.RESET;

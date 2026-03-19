@@ -1,5 +1,6 @@
 package com.jef.justenoughfakepixel.features.diana;
 
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
@@ -10,6 +11,7 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
 import java.util.*;
 
+@RegisterEvents
 public class DianaMobDetect {
 
     private static final long   NAME_CHECK_TIMEOUT_MS = 5_000L;

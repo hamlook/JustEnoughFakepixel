@@ -11,7 +11,6 @@ import java.io.*;
 
 public class DianaStats {
 
-
     private static DianaStats INSTANCE;
 
     public static DianaStats getInstance() {
@@ -21,33 +20,28 @@ public class DianaStats {
 
     private DianaStats() {}
 
-
-    private static final long    INACTIVITY_LIMIT_MS = 90_000L;
-    private static final Gson    GSON                = new GsonBuilder().setPrettyPrinting().create();
-    private static final Minecraft mc               = Minecraft.getMinecraft();
-
+    private static final long     INACTIVITY_LIMIT_MS = 90_000L;
+    private static final Gson     GSON                = new GsonBuilder().setPrettyPrinting().create();
+    private static final Minecraft mc                 = Minecraft.getMinecraft();
 
     private File      file = null;
     private DianaData data = new DianaData();
 
-
-    public volatile String  lastDropType   = null;   // set immediately on drop
+    public volatile String  lastDropType   = null;
     public volatile long    lastDropAmount = 0L;
-    public volatile long    lastDropMs     = 0L;     // timestamp of last drop — used to match doubled
-
+    public volatile long    lastDropMs     = 0L;
 
     private volatile boolean trackingEnabled = true;
     private volatile long    lastLootShareMs  = 0L;
     private volatile boolean hasTrackedInqLs  = false;
 
-    private long sessionStartMs = -1L;   // wall-clock, set on login
+    private long sessionStartMs = -1L;
 
     private boolean timerRunning      = false;
     private boolean timerStartedOnce  = false;
     private boolean inactivityFlagged = false;
     private long    timerStartTime    = 0L;
     private long    lastActivityTime  = 0L;
-
 
     public void initFile(File configDir) {
         this.file = new File(configDir, "diana_stats.json");
@@ -72,7 +66,6 @@ public class DianaStats {
         }
     }
 
-
     public void reset() {
         data              = new DianaData();
         lastDropType      = null;
@@ -95,14 +88,12 @@ public class DianaStats {
         return trackingEnabled;
     }
 
-
     public DianaData getData() { return data; }
 
     public boolean isTracking() {
         return trackingEnabled && hasSpadeInHotbar()
                 && ScoreboardUtils.getCurrentLocation() == ScoreboardUtils.Location.HUB;
     }
-
 
     public static boolean hasSpadeInHotbar() {
         if (mc.thePlayer == null) return false;
@@ -116,24 +107,19 @@ public class DianaStats {
         return false;
     }
 
-
-    /** Called when the player connects to a server. */
     public void onClientLogin() {
         sessionStartMs = System.currentTimeMillis();
     }
 
-    /** Called on disconnect. Pauses the active timer and clears session. */
     public void onClientLogout() {
         pauseTimer();
         sessionStartMs = -1L;
     }
 
-
     public long getSessionTimeMs() {
         if (sessionStartMs <= 0) return 0L;
         return System.currentTimeMillis() - sessionStartMs;
     }
-
 
     public void onLootshare() {
         lastLootShareMs = System.currentTimeMillis();
@@ -156,7 +142,6 @@ public class DianaStats {
             hasTrackedInqLs = false;
         }).start();
     }
-
 
     public void updateActivity() {
         if (!timerStartedOnce) {
@@ -193,7 +178,6 @@ public class DianaStats {
         save();
     }
 
-
     public double getBph() {
         if (data.activeTimeMs < 1_000L || data.totalBorrows == 0) return 0.0;
         return data.totalBorrows / (data.activeTimeMs / 3_600_000.0);
@@ -209,6 +193,9 @@ public class DianaStats {
         return (double) mobCount / data.totalMobs * 100.0;
     }
 
+    public String formatMobPct(int count) {
+        return data.totalMobs > 0 ? String.format("%.2f%%", getMobPercent(count)) : "-.--%%";
+    }
 
     public static String formatTime(long ms) {
         if (ms <= 0) return "0s";
@@ -219,10 +206,10 @@ public class DianaStats {
         long seconds = totalSeconds % 60;
 
         StringBuilder sb = new StringBuilder();
-        if (days > 0)                            sb.append(days).append("d ");
-        if (hours > 0 || days > 0)               sb.append(hours).append("h ");
-        if (minutes > 0 || hours > 0 || days > 0) sb.append(minutes).append("m ");
-        if (sb.length() == 0)                    sb.append(seconds).append("s");
+        if (days > 0)                              sb.append(days).append("d ");
+        if (hours > 0 || days > 0)                 sb.append(hours).append("h ");
+        if (minutes > 0 || hours > 0 || days > 0)  sb.append(minutes).append("m ");
+        if (sb.length() == 0)                      sb.append(seconds).append("s");
         return sb.toString().trim();
     }
 

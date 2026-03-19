@@ -2,6 +2,7 @@ package com.jef.justenoughfakepixel.features.misc;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jef.justenoughfakepixel.init.RegisterInstance;
 import com.jef.justenoughfakepixel.utils.ChatUtils;
 import com.jef.justenoughfakepixel.utils.ItemUtils;
 import net.minecraft.client.Minecraft;
@@ -24,15 +25,16 @@ import static com.jef.justenoughfakepixel.features.misc.PetCache.normalizePetNam
 
 public class CurrentPetTracker {
 
-    private static final Pattern SUMMONED = Pattern.compile("^You summoned your (.+)!$");
-    private static final Pattern AUTOPET = Pattern.compile("^Autopet equipped your \\[Lvl \\d+\\] (.+)!$");
+    private static final Pattern SUMMONED     = Pattern.compile("^You summoned your (.+)!$");
+    private static final Pattern AUTOPET      = Pattern.compile("^Autopet equipped your \\[Lvl \\d+\\] (.+)!$");
     private static final Pattern LEVEL_PREFIX = Pattern.compile("^\\[Lvl \\d+\\] ");
 
     private static final String PETS_CONTAINER = "Pets";
-    private static final String ACTIVE_LORE = "Click to despawn";
+    private static final String ACTIVE_LORE    = "Click to despawn";
 
     private static final Gson GSON = new GsonBuilder().create();
 
+    @RegisterInstance
     private static CurrentPetTracker INSTANCE;
 
     public static CurrentPetTracker getInstance() {
@@ -40,10 +42,9 @@ public class CurrentPetTracker {
         return INSTANCE;
     }
 
-    private CurrentPetTracker() {
-    }
+    private CurrentPetTracker() {}
 
-    private File file;
+    private File   file;
     private String currentBaseName = "";
 
     public void initFile(File configDir) {
@@ -100,7 +101,6 @@ public class CurrentPetTracker {
             if (texture == null || texture.isEmpty()) continue;
 
             String formatted = item.getDisplayName();
-// Fix double-encoded § character
             formatted = formatted.replace("Â§", "§");
             String base = LEVEL_PREFIX.matcher(
                     StringUtils.stripControlCodes(formatted)).replaceFirst("").trim();
@@ -124,14 +124,12 @@ public class CurrentPetTracker {
         String raw = StringUtils.stripControlCodes(event.message.getUnformattedText()).trim();
 
         Matcher m = SUMMONED.matcher(raw);
-
         if (!m.matches()) {
             m = AUTOPET.matcher(raw);
             if (!m.matches()) return;
         }
 
         String name = normalizePetName(m.group(1).trim());
-
         if (name.equals(currentBaseName)) return;
 
         currentBaseName = name;

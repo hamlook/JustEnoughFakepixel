@@ -1,11 +1,13 @@
 package com.jef.justenoughfakepixel.features.general;
 
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.input.Mouse;
 
+@RegisterEvents
 public class CursorResetHandler {
 
     private static final Minecraft mc = Minecraft.getMinecraft();

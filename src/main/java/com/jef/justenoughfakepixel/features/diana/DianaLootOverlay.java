@@ -3,13 +3,13 @@ package com.jef.justenoughfakepixel.features.diana;
 import com.jef.justenoughfakepixel.core.JefConfig;
 import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@RegisterEvents
 public class DianaLootOverlay extends JefOverlay {
 
     private static DianaLootOverlay instance;
@@ -27,12 +27,9 @@ public class DianaLootOverlay extends JefOverlay {
     @Override public int        getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.diana.lootBgColor); }
     @Override public int        getCornerRadius() { return JefConfig.feature.diana.lootCornerRadius; }
 
-    @SubscribeEvent
-    public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
-        if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
-        if (JefConfig.feature == null || !JefConfig.feature.diana.enabled
-                || !JefConfig.feature.diana.showLootOverlay) return;
-        render(false);
+    @Override
+    protected boolean isEnabled() {
+        return JefConfig.feature.diana.enabled && JefConfig.feature.diana.showLootOverlay;
     }
 
     @Override
@@ -58,10 +55,7 @@ public class DianaLootOverlay extends JefOverlay {
         DianaData d = stats.getData();
 
         lines.add("\u00a76\u00a7lDiana Loot");
-
-        String lsSuffix = d.totalInqsLootshared > 0
-                ? String.format("  \u00a77[\u00a7bLS \u00a7f%d\u00a77]", d.totalInqsLootshared) : "";
-        lines.add(String.format("\u00a77Inqs since Chimera: \u00a7f%d%s", d.inqsSinceChimera, lsSuffix));
+        lines.add(String.format("\u00a77Inqs since Chimera: \u00a7f%d%s", d.inqsSinceChimera, d.getLootsharedSuffix()));
         lines.add(String.format("\u00a7dChimeras: \u00a7f%d", d.totalChimeras));
         lines.add(String.format("\u00a71Feathers: \u00a7f%d", d.griffinFeathers));
         lines.add(String.format("\u00a72Shelmets: \u00a7f%d  \u00a75Remedies: \u00a7f%d  \u00a75Plushies: \u00a7f%d",

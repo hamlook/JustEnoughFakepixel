@@ -5,13 +5,13 @@ import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.events.PacketReceiveStatsEvent;
 import com.jef.justenoughfakepixel.events.PacketReceiveTimeUpdateEvent;
+import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
 import com.jef.justenoughfakepixel.utils.OverlayUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -20,6 +20,7 @@ import org.lwjgl.opengl.GL11;
 import java.util.ArrayList;
 import java.util.List;
 
+@RegisterEvents
 public class PerformanceHUD extends JefOverlay {
 
     public static final int OVERLAY_WIDTH  = 100;
@@ -54,6 +55,11 @@ public class PerformanceHUD extends JefOverlay {
     @Override public float    getScale()        { return JefConfig.feature.misc.hudScale; }
     @Override public int      getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.misc.hudBgColor); }
     @Override public int      getCornerRadius() { return JefConfig.feature.misc.hudCornerRadius; }
+
+    @Override
+    protected boolean isEnabled() {
+        return JefConfig.feature.misc.performanceHud;
+    }
 
     @SubscribeEvent
     public void onTimeUpdate(PacketReceiveTimeUpdateEvent event) {
@@ -100,17 +106,8 @@ public class PerformanceHUD extends JefOverlay {
         pingSentAt = -1L; pingMs = -1; ticksSincePing = 0;
     }
 
-    @SubscribeEvent
-    public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
-        if (event.type != RenderGameOverlayEvent.ElementType.ALL) return;
-        if (JefConfig.feature == null || !JefConfig.feature.misc.performanceHud) return;
-        if (OverlayUtils.shouldHide()) return;
-        render(false);
-    }
-
     @Override
     public List<String> getLines(boolean preview) {
-        if (JefConfig.feature == null) return new ArrayList<>();
         List<String> out = new ArrayList<>();
         if (JefConfig.feature.misc.hudShowFps)
             out.add(C_LABEL + "FPS: "  + C_VAL + (preview ? 60     : Minecraft.getDebugFPS()));
@@ -123,7 +120,6 @@ public class PerformanceHUD extends JefOverlay {
 
     @Override
     public void render(boolean preview) {
-        if (JefConfig.feature == null) return;
         if (!preview && OverlayUtils.shouldHide()) return;
 
         List<String> lines = getLines(preview);
