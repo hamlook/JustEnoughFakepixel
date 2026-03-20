@@ -5,6 +5,8 @@ import com.jef.justenoughfakepixel.core.config.editors.ChromaColour;
 import com.jef.justenoughfakepixel.core.config.utils.Position;
 import com.jef.justenoughfakepixel.features.mining.FetchurHelper;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
+import org.lwjgl.input.Keyboard;
+import net.minecraft.util.ChatComponentText;
 import com.jef.justenoughfakepixel.utils.ColorUtils;
 import com.jef.justenoughfakepixel.utils.JefOverlay;
 import com.jef.justenoughfakepixel.utils.OverlayUtils;
@@ -73,7 +75,7 @@ public class CustomScoreboard extends JefOverlay {
     }
 
     public static CustomScoreboard getInstance() { return instance; }
-
+    private boolean wasDown = false;
     public static boolean isActive() {
         return JefConfig.feature != null
                 && JefConfig.feature.scoreboard != null
@@ -291,9 +293,14 @@ public class CustomScoreboard extends JefOverlay {
         for (int ri = 0; ri < raw.size(); ri++) {
             String l = raw.get(ri);
             if (claimed.contains(l)) continue;
+
             String c = ColorUtils.stripColor(l).trim();
             if (c.isEmpty()) continue;
             if (WEBSITE_PATTERN.matcher(c).find()) continue;
+
+            // Find the best insertion point: after the last output line whose raw index is <= ri
+            //  track unknown
+            UnknownLinesHandler.handle(l);
 
             int insertAt = lines.size();
             for (int j = lineRawIndex.size() - 1; j >= 0; j--) {
@@ -302,14 +309,21 @@ public class CustomScoreboard extends JefOverlay {
                     break;
                 }
             }
+
             lines.add(insertAt, l);
             lineRawIndex.add(insertAt, ri);
         }
 
         if (websiteRaw != null) lines.add(websiteRaw);
 
+        List<String> clean = new ArrayList<>();
+        for (String line : lines) {
+            clean.add(ColorUtils.stripColor(line));
+        }
+        CustomScoreboardAPI.update(clean);
         return lines;
     }
+
 
     @Override
     public void render(boolean preview) {
@@ -318,6 +332,14 @@ public class CustomScoreboard extends JefOverlay {
 
         List<String> lines = getLines(preview);
         if (lines.isEmpty()) return;
+
+        boolean down = Keyboard.isKeyDown(JefConfig.feature.debug.scoreboardDebugKey);
+        if (down && !wasDown) {
+            Minecraft.getMinecraft().thePlayer.addChatMessage(
+                    new ChatComponentText(CustomScoreboardAPI.toJson())
+            );
+        }
+        wasDown = down;
 
         Minecraft mc = Minecraft.getMinecraft();
         float scale  = getScale();
