@@ -8,7 +8,6 @@ import com.jef.justenoughfakepixel.utils.ScoreboardUtils;
 import com.jef.justenoughfakepixel.utils.TablistParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.StringUtils;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -89,23 +88,24 @@ public class PowderTracker {
                 continue;
             }
 
-            // after — stable skyblock ID check
             if (!ItemUtils.getInternalName(current).equals("ENCHANTED_HARD_STONE")) {
-                lastInventory[i] = current;
+                lastInventory[i] = current.copy();
                 continue;
             }
 
-            int prevCount = (prev != null && StringUtils.stripControlCodes(prev.getDisplayName()).trim().equals("Hard Stone"))
-                    ? prev.stackSize : 0;
-            int gained = current.stackSize - prevCount;
+            if (prev == null) {
+                lastInventory[i] = current.copy();
+                continue;
+            }
 
+            int gained = current.stackSize - prev.stackSize;
             if (gained > 0) {
                 PowderStats stats = PowderStats.getInstance();
                 stats.getData().hardStone += gained;
                 stats.save();
             }
 
-            lastInventory[i] = current;
+            lastInventory[i] = current.copy();
         }
     }
 

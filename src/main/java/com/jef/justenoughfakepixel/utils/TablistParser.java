@@ -184,10 +184,11 @@ public class TablistParser {
             if (inAccountSection) {
                 if (expectEventTime) {
                     if (line.startsWith("Ends in: ")) {
-                        activeEvent         = pendingEvent;
                         activeEventTimeLeft = line.substring("Ends in: ".length()).trim();
+                    } else if (line.equals("No active event")) {
+                        activeEvent         = null;
+                        activeEventTimeLeft = null;
                     } else {
-                        activeEvent         = pendingEvent;
                         activeEventTimeLeft = null;
                     }
                     expectEventTime = false;
@@ -196,8 +197,18 @@ public class TablistParser {
                 }
 
                 if (line.startsWith("Event: ")) {
-                    pendingEvent    = line.substring("Event: ".length()).trim();
-                    expectEventTime = true;
+                    activeEvent         = line.substring("Event: ".length()).trim();
+                    activeEventTimeLeft = null;
+                    expectEventTime     = true;
+                    pendingEvent        = activeEvent;
+                    continue;
+                }
+
+                if (line.equals("Mining Event:") || line.startsWith("Mining Event: ")) {
+                    activeEvent         = null;
+                    activeEventTimeLeft = null;
+                    expectEventTime     = true;
+                    pendingEvent        = null;
                     continue;
                 }
 
@@ -214,8 +225,8 @@ public class TablistParser {
             }
         }
 
-        if (expectEventTime && pendingEvent != null) {
-            activeEvent         = pendingEvent;
+        if (expectEventTime && pendingEvent == null) {
+            activeEvent         = null;
             activeEventTimeLeft = null;
         }
     }
