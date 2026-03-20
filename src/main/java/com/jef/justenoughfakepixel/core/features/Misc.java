@@ -124,6 +124,44 @@ public class Misc {
     public boolean editCurrentPetPosDummy = false;
 
     @Expose
+    @ConfigOption(name = "Item Pickup Log", desc = "Settings for the item pickup log")
+    @ConfigEditorAccordion(id = 20)
+    public boolean itemPickupLogAccordion = false;
+
+    @Expose
+    @ConfigOption(name = "Enable", desc = "Show a HUD list of recently picked-up or lost items")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 20)
+    public boolean itemPickupLog = true;
+
+    @Expose
+    @ConfigOption(name = "Background Color", desc = "Background color of the log (alpha controls opacity)")
+    @ConfigEditorColour
+    @ConfigAccordionId(id = 20)
+    public String itemPickupLogBgColor = "160:0:0:0:0";
+
+    @Expose
+    @ConfigOption(name = "Corner Radius", desc = "Roundness of the log corners")
+    @ConfigEditorSliderAnnotation(minValue = 0f, maxValue = 12f, minStep = 1f)
+    @ConfigAccordionId(id = 20)
+    public int itemPickupLogCornerRadius = 4;
+
+    @Expose
+    @ConfigOption(name = "Scale", desc = "Size of the item pickup log")
+    @ConfigEditorSliderAnnotation(minValue = 0.5f, maxValue = 3f, minStep = 0.1f)
+    @ConfigAccordionId(id = 20)
+    public float itemPickupLogScale = 1f;
+
+    @Expose
+    @ConfigOption(name = "Edit Position", desc = "Drag to reposition the item pickup log")
+    @ConfigEditorButton(runnableId = "openItemPickupLogEditor", buttonText = "Edit")
+    @ConfigAccordionId(id = 20)
+    public boolean editItemPickupLogPosDummy = false;
+
+    @Expose
+    public Position itemPickupLogPos = new Position(2, 60);
+
+    @Expose
     public Position searchBarPos = new Position(4, 4);
 
     @Expose

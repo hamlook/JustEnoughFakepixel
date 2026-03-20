@@ -8,6 +8,7 @@ import com.jef.justenoughfakepixel.core.config.command.JefCommand;
 import com.jef.justenoughfakepixel.core.config.editors.GuiPositionEditor;
 import com.jef.justenoughfakepixel.features.misc.SearchBar;
 import com.jef.justenoughfakepixel.features.diana.DianaEventOverlay;
+import com.jef.justenoughfakepixel.features.misc.ItemPickupLog;
 import com.jef.justenoughfakepixel.features.diana.GuiDianaOverlayEditor;
 import com.jef.justenoughfakepixel.features.general.GyroWandOverlay;
 import com.jef.justenoughfakepixel.features.mining.FetchurOverlay;
@@ -199,6 +200,22 @@ public class JefConfig {
                 JefConfig::saveConfig,
                 JefConfig::saveConfig
         ).withOverlayScale(feature.misc.currentPetScale)
+                .withParent(Minecraft.getMinecraft().currentScreen);
+    }
+
+    public static void openItemPickupLogEditor() {
+        if (feature == null) return;
+        ItemPickupLog overlay = ItemPickupLog.getInstance();
+        if (overlay == null) return;
+        overlay.render(true);
+        screenToOpen = new GuiPositionEditor(
+                feature.misc.itemPickupLogPos,
+                overlay::getOverlayWidth,
+                overlay::getOverlayHeight,
+                () -> overlay.render(true),
+                JefConfig::saveConfig,
+                JefConfig::saveConfig
+        ).withOverlayScale(feature.misc.itemPickupLogScale)
                 .withParent(Minecraft.getMinecraft().currentScreen);
     }
 
