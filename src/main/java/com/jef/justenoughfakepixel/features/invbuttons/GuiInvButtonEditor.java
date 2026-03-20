@@ -413,12 +413,9 @@ public class GuiInvButtonEditor extends GuiScreen {
 
             if (type == 0) {
                 SkyblockItemCache cache = SkyblockItemCache.getInstance();
-                List<String> ids = cache.isLoaded() ? cache.getAllItemIds() : getBuiltinItemIds();
+                Iterable<String> ids = cache.isLoaded() ? cache.getAllItemIds() : getBuiltinItemIds();
                 for (String id : ids) {
-                    if (q.isEmpty() || id.toLowerCase().contains(q)) {
-                        if (InvButtonIconRenderer.getStack(id) != null) results.add(id);
-                    }
-                    if (results.size() >= 256) break;
+                    if (q.isEmpty() || id.toLowerCase().contains(q)) results.add(id);
                 }
             } else if (type == 1) {
                 SkyblockItemCache cache = SkyblockItemCache.getInstance();
@@ -426,7 +423,6 @@ public class GuiInvButtonEditor extends GuiScreen {
                 for (Map.Entry<String, String> e : skulls.entrySet()) {
                     if (q.isEmpty() || e.getKey().toLowerCase().contains(q))
                         results.add("skull:" + e.getValue());
-                    if (results.size() >= 256) break;
                 }
             } else {
                 if (extraIconsCache != null)

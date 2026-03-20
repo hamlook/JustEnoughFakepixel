@@ -1,28 +1,31 @@
 package com.jef.justenoughfakepixel.features.invbuttons;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class SkyblockItemCache {
 
     private static final SkyblockItemCache INSTANCE = new SkyblockItemCache();
     public static SkyblockItemCache getInstance() { return INSTANCE; }
 
-    private static final String API_URL = "https://api.hypixel.net/v2/resources/skyblock/items";
+    private static final String REPO_ZIP_URL =
+            "https://github.com/NotEnoughUpdates/NotEnoughUpdates-REPO/archive/master.zip";
 
-    private final Map<String, String> skullItems = new LinkedHashMap<>();
-    private final List<String> allItemIds = new ArrayList<>();
+    // internalname -> full item JsonObject
+    private final TreeMap<String, JsonObject> itemMap = new TreeMap<>();
+    // internalname -> texture hash (only skull items)
+    private final LinkedHashMap<String, String> skullMap = new LinkedHashMap<>();
+
     private volatile boolean loaded = false;
 
     private final ExecutorService loader = Executors.newSingleThreadExecutor(r -> {
@@ -38,96 +41,102 @@ public class SkyblockItemCache {
 
     private void loadSync() {
         try {
-            System.out.println("[JEF] Connecting to Hypixel API...");
-            HttpURLConnection conn = (HttpURLConnection) new URL(API_URL).openConnection();
-            conn.setConnectTimeout(8000);
-            conn.setReadTimeout(8000);
+            System.out.println("[JEF] Downloading NEU item repo...");
+            HttpURLConnection conn = (HttpURLConnection) new URL(REPO_ZIP_URL).openConnection();
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(60000);
             conn.setRequestProperty("User-Agent", "JEF/1.0");
 
-            int code = conn.getResponseCode();
-            System.out.println("[JEF] Response code: " + code);
-            if (code != 200) {
-                loaded = true;
-                return;
-            }
+            int items = 0, skulls = 0;
+            JsonParser parser = new JsonParser();
 
-            StringBuilder sb = new StringBuilder();
-            try (BufferedReader br = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = br.readLine()) != null) sb.append(line);
-            }
+            try (ZipInputStream zip = new ZipInputStream(new BufferedInputStream(conn.getInputStream()))) {
+                ZipEntry entry;
+                while ((entry = zip.getNextEntry()) != null) {
+                    String name = entry.getName();
+                    if (!name.endsWith(".json") || !name.contains("/items/")) { zip.closeEntry(); continue; }
 
-            System.out.println("[JEF] Response length: " + sb.length());
-            System.out.println("[JEF] First 200 chars: " +
-                    sb.substring(0, Math.min(200, sb.length())));
+                    String filename = name.substring(name.lastIndexOf('/') + 1);
+                    String internalName = filename.substring(0, filename.length() - 5);
 
-            JsonObject root = new JsonParser().parse(sb.toString()).getAsJsonObject();
-            System.out.println("[JEF] Has 'items': " + root.has("items"));
+                    byte[] bytes = readEntry(zip);
+                    try {
+                        JsonObject json = parser.parse(new String(bytes, StandardCharsets.UTF_8)).getAsJsonObject();
+                        if (!json.has("itemid")) { zip.closeEntry(); continue; }
 
-            JsonArray items = root.getAsJsonArray("items");
+                        synchronized (itemMap) { itemMap.put(internalName, json); }
+                        items++;
 
-            int skulls = 0;
-            for (JsonElement el : items) {
-                if (!el.isJsonObject()) continue;
-
-                JsonObject obj = el.getAsJsonObject();
-                if (!obj.has("id")) continue;
-
-                String id = obj.get("id").getAsString();
-
-                synchronized (allItemIds) {
-                    allItemIds.add(id);
-                }
-
-                if (obj.has("skin") && obj.get("skin").isJsonObject()) {
-                    JsonObject skinObj = obj.getAsJsonObject("skin");
-                    if (skinObj.has("value")) {
-                        String hash = hashFromB64(skinObj.get("value").getAsString());
-                        if (hash != null) {
-                            synchronized (skullItems) {
-                                skullItems.put(id, hash);
+                        // Detect skull items: itemid ends with "skull" and nbttag has texture
+                        String itemid = json.get("itemid").getAsString().toLowerCase();
+                        if ((itemid.endsWith("skull") || itemid.endsWith("skull_item")) && json.has("nbttag")) {
+                            String hash = extractSkullHash(json.get("nbttag").getAsString());
+                            if (hash != null) {
+                                synchronized (skullMap) { skullMap.put(internalName, hash); }
+                                skulls++;
                             }
-                            skulls++;
                         }
-                    }
+                    } catch (Exception ignored) {}
+                    zip.closeEntry();
                 }
-            }
-
-            synchronized (allItemIds) {
-                Collections.sort(allItemIds);
             }
 
             loaded = true;
-            System.out.println("[JEF] Loaded " + allItemIds.size() + " items, " + skulls + " skulls.");
-
+            System.out.println("[JEF] Loaded " + items + " items, " + skulls + " skulls from NEU repo.");
         } catch (Exception e) {
-            System.err.println("[JEF] Item cache failed!");
-            e.printStackTrace(); // <-- important: full stack trace
+            System.err.println("[JEF] Item cache failed: " + e.getMessage());
             loaded = true;
         }
     }
 
-    private String hashFromB64(String b64) {
+    /**
+     * Extracts the texture hash from a raw NBT string like:
+     * {SkullOwner:{Properties:{textures:[{Value:"...base64..."}]}}}
+     * Decodes the base64, then finds /texture/HASH
+     */
+    private String extractSkullHash(String nbtString) {
         try {
+            // Find Value:" in the nbt string
+            int vi = nbtString.indexOf("Value:\"");
+            if (vi == -1) vi = nbtString.indexOf("Value:'");
+            if (vi == -1) return null;
+            vi += 7;
+            char closeChar = nbtString.charAt(vi - 1);
+            int end = nbtString.indexOf(closeChar, vi);
+            if (end == -1) return null;
+            String b64 = nbtString.substring(vi, end);
             String decoded = new String(Base64.getDecoder().decode(b64), StandardCharsets.UTF_8);
-            int i = decoded.indexOf("/texture/");
-            if (i == -1) return null;
-            i += "/texture/".length();
-            int end = decoded.indexOf("\"", i);
-            if (end == -1) end = decoded.length();
-            String h = decoded.substring(i, end).trim();
-            return h.isEmpty() ? null : h;
+            int ti = decoded.indexOf("/texture/");
+            if (ti == -1) return null;
+            ti += "/texture/".length();
+            int hashEnd = decoded.indexOf("\"", ti);
+            if (hashEnd == -1) hashEnd = decoded.length();
+            String hash = decoded.substring(ti, hashEnd).trim();
+            return hash.isEmpty() ? null : hash;
         } catch (Exception e) { return null; }
+    }
+
+    private byte[] readEntry(ZipInputStream zip) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buf = new byte[4096];
+        int n;
+        while ((n = zip.read(buf)) != -1) baos.write(buf, 0, n);
+        return baos.toByteArray();
     }
 
     public boolean isLoaded() { return loaded; }
 
-    public List<String> getAllItemIds() {
-        synchronized (allItemIds) { return new ArrayList<>(allItemIds); }
+    public JsonObject getItemJson(String internalName) {
+        synchronized (itemMap) { return itemMap.get(internalName); }
     }
 
+    /** All item internal names, sorted */
+    public Set<String> getAllItemIds() {
+        synchronized (itemMap) { return new LinkedHashSet<>(itemMap.keySet()); }
+    }
+
+    /** Skull items: internalName -> texture hash */
     public Map<String, String> getSkullItems() {
-        synchronized (skullItems) { return new LinkedHashMap<>(skullItems); }
+        synchronized (skullMap) { return new LinkedHashMap<>(skullMap); }
     }
 }
