@@ -19,7 +19,7 @@ import org.lwjgl.opengl.GL11;
 public class GyroWandHelper {
 
     private static final String GYRO_ID     = "GYROKINETIC_WAND";
-    private static final int    RING_RADIUS = 10;
+    private static final double    RING_RADIUS = 8.5;
     private static final int    RING_STEPS  = 64;
     private static final double REACH = 100.0;
 
