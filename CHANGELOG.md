@@ -1,21 +1,16 @@
 
-# JEF 1.2.1 - 1.2.2 Changelog
+# JEF 1.2.2 - 1.2.3 Changelog
 
-## fixes 
-* Fixed inquisitor lootshare detection
-* fixed messages sent by players getting tracked by diana tracker
-* fixed pos editor gui not opening parent gui after closing
-* fixed fetchur
-* diana overlays are now seperated
+- Added Enchant Parser (_beta_)
+- Missing Enchants
+- Added Current Pet Overlay
+- Added Gyrowand helper
+- Added Gemstone Powder tracker
+- Added Mouse Movement lock
+- Item Pickup log
+- Inventory Buttons
 
 
-
-## Additions
-
-* Custom scoreboard {with line rearrangement, opacity control, position control}
-* Better config for all overlay backgrounds
-* search bar pos is now configurable
-* Inquisitor and diana mob health overlays
 
 
 

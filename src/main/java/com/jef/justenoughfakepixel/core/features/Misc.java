@@ -170,9 +170,6 @@ public class Misc {
     @Expose
     public Position currentPetPos = new Position(18, 14);
 
-
-    // ── Inventory Buttons ────────────────────────────────────────────────────
-
     @Expose
     @ConfigOption(name = "Inventory Buttons", desc = "Clickable shortcut buttons on inventories")
     @ConfigEditorAccordion(id = 30)
