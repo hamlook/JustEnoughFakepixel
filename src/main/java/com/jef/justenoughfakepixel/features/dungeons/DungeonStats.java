@@ -413,7 +413,8 @@ public class DungeonStats extends JefOverlay {
 
     private void checkAndSaveRunPb() {
         if (JefConfig.feature == null || currentFloor == DungeonFloor.NONE || bossDeadTime == 0) return;
-        savePbIfBetter(currentFloor.name() + "_boss", bossDeadTime - bossTime, null);
+        savePbIfBetter(currentFloor.name() + "_boss",  bossDeadTime - bossTime, null);
+        savePbIfBetter(currentFloor.name() + "_total", bossDeadTime, "Total");
     }
 
     private void checkPhasePb(String key, long duration, String phaseName) {
@@ -452,7 +453,7 @@ public class DungeonStats extends JefOverlay {
         if (floor == DungeonFloor.NONE) return "Unknown floor: " + arg1;
 
         if (arg2 == null) {
-            long pb = JefConfig.feature.dungeons.getPb(floor.name() + "_boss");
+            long pb = JefConfig.feature.dungeons.getPb(floor.name() + "_total");
             return pb > 0 ? floor.name() + " PB: " + fmt(pb) : floor.name() + ": No PB";
         }
 

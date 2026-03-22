@@ -12,7 +12,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,7 +39,14 @@ public class PetCache {
     }
 
     private File file;
-    private final Map<String, CachedPet> pets = new HashMap<>();
+    private static final int MAX_ENTRIES = 200;
+
+    private final Map<String, CachedPet> pets = new LinkedHashMap<String, CachedPet>(16, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, CachedPet> eldest) {
+            return size() > MAX_ENTRIES;
+        }
+    };
 
     public void initFile(File configDir) {
         file = new File(configDir, "pet_cache.json");
