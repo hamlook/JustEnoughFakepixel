@@ -249,7 +249,7 @@ public class JefConfig {
         ).withOverlayScale(feature.mining.powderOverlayScale)
                 .withParent(Minecraft.getMinecraft().currentScreen);
     }
-    public static void editDungeonBreakerPosDummy() {
+    public static void openDungeonBreakerEditor() {
         if (feature == null) return;
         DungeonBreakerOverlay overlay = DungeonBreakerOverlay.getInstance();
         if (overlay == null) return;

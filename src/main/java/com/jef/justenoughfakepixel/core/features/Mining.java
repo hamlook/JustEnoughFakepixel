@@ -130,4 +130,27 @@ public class Mining {
 
     @Expose
     public Position powderOverlayPos = new Position(4, 60);
+
+    @Expose
+    @ConfigOption(name = "HOTM Powder Display", desc = "Powder cost info on HOTM perk tooltips")
+    @ConfigEditorAccordion(id = 22)
+    public boolean hotmPowderAccordion = false;
+
+    @Expose
+    @ConfigOption(name = "Powder Spent", desc = "Show total powder invested vs max cost on each HOTM perk tooltip")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 22)
+    public boolean hotmPowderSpent = true;
+
+    @Expose
+    @ConfigOption(name = "Powder Spent Format", desc = "How to display the powder spent amount")
+    @ConfigEditorDropdown(values = {"Number", "Percentage", "Number and Percentage"})
+    @ConfigAccordionId(id = 22)
+    public int hotmPowderSpentDesign = 0;
+
+    @Expose
+    @ConfigOption(name = "Powder for Next 10 Levels", desc = "Hold Shift on a perk to see powder cost for the next 10 upgrades")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 22)
+    public boolean hotmPowderFor10Levels = true;
 }
