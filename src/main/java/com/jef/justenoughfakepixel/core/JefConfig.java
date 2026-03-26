@@ -16,6 +16,7 @@ import com.jef.justenoughfakepixel.features.mining.FetchurOverlay;
 import com.jef.justenoughfakepixel.features.mining.PowderOverlay;
 import com.jef.justenoughfakepixel.features.mining.PowderStats;
 import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
+import com.jef.justenoughfakepixel.features.dungeons.DungeonRoomOverlay;
 import com.jef.justenoughfakepixel.features.misc.CurrentPetOverlay;
 import com.jef.justenoughfakepixel.features.misc.PerformanceHUD;
 import com.jef.justenoughfakepixel.features.scoreboard.CustomScoreboard;
@@ -123,6 +124,21 @@ public class JefConfig {
                 JefConfig::saveConfig,
                 JefConfig::saveConfig
         ).withOverlayScale(feature.dungeons.statsScale)
+                .withParent(Minecraft.getMinecraft().currentScreen);
+    }
+
+    public static void openDungeonRoomOverlayEditor() {
+        if (feature == null) return;
+        DungeonRoomOverlay overlay = DungeonRoomOverlay.getInstance();
+        if (overlay == null) return;
+        screenToOpen = new GuiPositionEditor(
+                feature.dungeons.dungeonRoomOverlayPos,
+                overlay::getOverlayWidth,
+                overlay::getOverlayHeight,
+                () -> overlay.render(true),
+                JefConfig::saveConfig,
+                JefConfig::saveConfig
+        ).withOverlayScale(feature.dungeons.dungeonRoomOverlayScale)
                 .withParent(Minecraft.getMinecraft().currentScreen);
     }
 

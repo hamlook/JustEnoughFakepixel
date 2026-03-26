@@ -152,6 +152,43 @@ public class Dungeons {
     @Expose
     public Position dungeonBreakerPos = new Position(4, 120);
 
+    @Expose
+    @ConfigOption(name = "Dungeon Room Overlay", desc = "Shows the name of your current dungeon room on screen")
+    @ConfigEditorAccordion(id = 43)
+    public boolean dungeonRoomOverlayAccordion = false;
+
+    @Expose
+    @ConfigOption(name = "Enable", desc = "Show current room name overlay while in dungeons")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 43)
+    public boolean dungeonRoomOverlay = false;
+
+    @Expose
+    @ConfigOption(name = "Background Color", desc = "Background color of the overlay")
+    @ConfigEditorColour
+    @ConfigAccordionId(id = 43)
+    public String dungeonRoomOverlayBgColor = "0:0:0:0:0";
+
+    @Expose
+    @ConfigOption(name = "Corner Radius", desc = "Roundness of overlay corners")
+    @ConfigEditorSliderAnnotation(minValue = 0f, maxValue = 12f, minStep = 1f)
+    @ConfigAccordionId(id = 43)
+    public int dungeonRoomOverlayCornerRadius = 4;
+
+    @Expose
+    @ConfigOption(name = "Scale", desc = "Size of the room name overlay")
+    @ConfigEditorSliderAnnotation(minValue = 0.5f, maxValue = 3f, minStep = 0.1f)
+    @ConfigAccordionId(id = 43)
+    public float dungeonRoomOverlayScale = 1f;
+
+    @Expose
+    @ConfigOption(name = "Edit Position", desc = "Drag the overlay to reposition it")
+    @ConfigEditorButton(runnableId = "openDungeonRoomOverlayEditor", buttonText = "Edit")
+    @ConfigAccordionId(id = 43)
+    public boolean editDungeonRoomOverlayPosDummy = false;
+
+    @Expose
+    public Position dungeonRoomOverlayPos = new Position(4, 140);
 
     @Expose
     public Map<String, Long> floorPbs = new HashMap<>();
