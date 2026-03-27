@@ -63,6 +63,7 @@ public class Config {
             case "resetPowderTracker": JefConfig.resetPowderTracker(); break;
             case "openDungeonBreakerEditor": JefConfig.openDungeonBreakerEditor(); break;
             case "openTrophyFishEditor":    JefConfig.openTrophyFishEditor();    break;
+            case "openDungeonRoomOverlayEditor": JefConfig.openDungeonRoomOverlayEditor(); break;
         }
     }
 }

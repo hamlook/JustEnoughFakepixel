@@ -120,6 +120,12 @@ public class DungeonStats extends JefOverlay {
 
     public static DungeonStats getInstance() { return instance; }
 
+    /** Returns true once the player has entered the boss room for the current run. */
+    public static boolean isInBossFight() {
+        DungeonStats s = getInstance();
+        return s != null && s.bossTime > 0 && s.bossDeadTime == 0;
+    }
+
     @Override public Position getPosition()     { return JefConfig.feature.dungeons.statsPos; }
     @Override public float    getScale()        { return JefConfig.feature.dungeons.statsScale; }
     @Override public int      getBgColor()      { return ChromaColour.specialToChromaRGB(JefConfig.feature.dungeons.statsBgColor); }
