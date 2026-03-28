@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.features.dungeons.DungeonStats;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.utils.data.SkyblockData;
 import net.minecraft.block.Block;
@@ -32,10 +34,17 @@ public class DungeonRoomDetector {
     private static JsonObject lastRoomJson = null;
     private final Executor executor = Executors.newFixedThreadPool(2);
 
-    @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.START) return;
+        if (JefConfig.feature == null || !JefConfig.feature.dungeons.dungeonRoomOverlay) {
+            DungeonRoomOverlay.currentRoomName = null;
+            DungeonRoomOverlay.currentRoomNotes = null;
+            lastRoomHash = null;
+            lastRoomJson = null;
+            return;
+        }
         if (SkyblockData.getCurrentLocation() != SkyblockData.Location.DUNGEON) return;
+        if (DungeonStats.isInBossFight()) return;
         if (++tickCount % 30 != 0) return;
 
         Minecraft mc = Minecraft.getMinecraft();

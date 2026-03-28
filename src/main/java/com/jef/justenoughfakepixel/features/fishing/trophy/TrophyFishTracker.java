@@ -34,8 +34,8 @@ public class TrophyFishTracker {
      * REGEX-TEST: §6♔ §r§6§lTROPHY FISH! §r§fYou caught an §r§6Golden Fish §r§7§lSILVER§r§f!
      */
     private static final Pattern TROPHY_CHAT = Pattern.compile(
-            "§6♔ §r§6§lTROPHY FISH! §r§fYou caught an? §r" +
-                    "(?<displayName>§[0-9a-fA-F](?:§k)?[\\w -]+) §r" +
+            "(?:§r)?§6♔ §r§6§lTROPHY FISH! §r§fYou caught an? §r" +
+                    "(?<displayName>§[0-9a-fA-F](?:§k)?[\\w -]+?)(?:§r§f)? §r" +
                     "(?<displayRarity>§[0-9a-fA-F]§l\\w+)§r§f!"
     );
 
