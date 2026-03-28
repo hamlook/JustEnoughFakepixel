@@ -10,9 +10,9 @@ import java.lang.annotation.Target;
  *
  * <p>Structural:
  * <ul>
- *   <li>{@link Category}        – marks a field as a config category</li>
- *   <li>{@link ConfigOption}    – marks a field as a configurable option</li>
- *   <li>{@link ConfigAccordionId} – assigns an option to an accordion group</li>
+ *   <li>{@link Category}              – marks a field as a config category</li>
+ *   <li>{@link ConfigOption}          – marks a field as a configurable option</li>
+ *   <li>{@link ConfigAccordionId}     – assigns an option to an accordion group</li>
  *   <li>{@link ConfigEditorAccordion} – marks a field as the accordion toggle</li>
  * </ul>
  * Editor types (one per field):
@@ -26,6 +26,7 @@ import java.lang.annotation.Target;
  *   <li>{@link ConfigEditorSliderAnnotation}</li>
  *   <li>{@link ConfigEditorStyle}</li>
  *   <li>{@link ConfigEditorText}</li>
+ *   <li>{@link ConfigEditorVersionDisplay} – renders the mod version + update check button</li>
  * </ul>
  */
 public final class ConfigAnnotations {
@@ -70,7 +71,7 @@ public final class ConfigAnnotations {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface ConfigEditorButton {
-        String runnableId();
+        String runnableId() default "";
         String buttonText() default "";
     }
 
@@ -113,4 +114,12 @@ public final class ConfigAnnotations {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface ConfigEditorText {}
+
+    /**
+     * Renders the current mod version at 2× scale with a "Check for Updates" button.
+     * Use on a {@code transient Void} field — nothing is serialised.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface ConfigEditorVersionDisplay {}
 }

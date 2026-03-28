@@ -4,7 +4,14 @@ import com.google.gson.annotations.Expose;
 import com.jef.justenoughfakepixel.core.features.*;
 import com.jef.justenoughfakepixel.core.config.gui.config.ConfigAnnotations.*;
 
+import java.awt.Desktop;
+import java.net.URI;
+
 public class Config {
+
+    @Expose
+    @Category(name = "About", desc = "Links, credits & used software")
+    public final About about = new About();
 
     @Expose
     @Category(name = "Quality of life", desc = "QOL features")
@@ -48,22 +55,42 @@ public class Config {
 
     public void executeRunnable(String runnableId) {
         switch (runnableId) {
-            case "openScoreboardEditor":  JefConfig.openScoreboardEditor();   break;
-            case "openWaypointGroupGui":  JefConfig.openWaypointGroupGui();   break;
-            case "openStatsEditor":       JefConfig.openStatsEditor();        break;
-            case "openHudEditor":         JefConfig.openHudEditor();          break;
-            case "openFetchurEditor":     JefConfig.openFetchurEditor();      break;
-            case "openDianaOverlayEditor":   JefConfig.openDianaOverlayEditor();    break;
-            case "openSearchBarEditor":   JefConfig.openSearchBarEditor();    break;
-            case "openCurrentPetEditor": JefConfig.openCurrentPetEditor();    break;
-            case "openItemPickupLogEditor": JefConfig.openItemPickupLogEditor(); break;
-            case "openGyroWandEditor": JefConfig.openGyroWandEditor(); break;
-            case "openPowderEditor":   JefConfig.openPowderEditor();   break;
-            case "openInvButtonEditor": JefConfig.openInvButtonEditor(); break;
-            case "resetPowderTracker": JefConfig.resetPowderTracker(); break;
-            case "openDungeonBreakerEditor": JefConfig.openDungeonBreakerEditor(); break;
-            case "openTrophyFishEditor":    JefConfig.openTrophyFishEditor();    break;
-            case "openDungeonRoomOverlayEditor": JefConfig.openDungeonRoomOverlayEditor(); break;
+            // ── runnables ───────────────────────────────────────────
+            case "openScoreboardEditor":         JefConfig.openScoreboardEditor();          break;
+            case "openWaypointGroupGui":          JefConfig.openWaypointGroupGui();          break;
+            case "openStatsEditor":               JefConfig.openStatsEditor();               break;
+            case "openHudEditor":                 JefConfig.openHudEditor();                 break;
+            case "openFetchurEditor":             JefConfig.openFetchurEditor();             break;
+            case "openDianaOverlayEditor":        JefConfig.openDianaOverlayEditor();        break;
+            case "openSearchBarEditor":           JefConfig.openSearchBarEditor();           break;
+            case "openCurrentPetEditor":          JefConfig.openCurrentPetEditor();          break;
+            case "openItemPickupLogEditor":       JefConfig.openItemPickupLogEditor();       break;
+            case "openGyroWandEditor":            JefConfig.openGyroWandEditor();            break;
+            case "openPowderEditor":              JefConfig.openPowderEditor();              break;
+            case "openInvButtonEditor":           JefConfig.openInvButtonEditor();           break;
+            case "resetPowderTracker":            JefConfig.resetPowderTracker();            break;
+            case "openDungeonBreakerEditor":      JefConfig.openDungeonBreakerEditor();      break;
+            case "openTrophyFishEditor":          JefConfig.openTrophyFishEditor();          break;
+            case "openDungeonRoomOverlayEditor":  JefConfig.openDungeonRoomOverlayEditor();  break;
+
+            // ── About: links ─────────────────────────────────────────────────
+            case "openDiscord":  openUrl("https://discord.gg/tdMFbmhFTb");                           break;
+            case "openGithub":   openUrl("https://github.com/hamlook/justenoughfakepixel");          break;
+
+            // ── About: used software ─────────────────────────────────────────
+            case "openLicenseForge":         openUrl("https://github.com/MinecraftForge/MinecraftForge");        break;
+            case "openLicenseMixin":         openUrl("https://github.com/SpongePowered/Mixin/");                 break;
+            case "openLicenseMoulConfig":    openUrl("https://github.com/NotEnoughUpdates/MoulConfig");          break;
+            case "openLicenseLombok":        openUrl("https://projectlombok.org/");                              break;
+            case "openLicenseReflections":   openUrl("https://github.com/ronmamo/reflections");                  break;
+            case "openLicenseJavassist":     openUrl("https://github.com/jboss-javassist/javassist");            break;
+            case "openLicenseJbAnnotations": openUrl("https://github.com/JetBrains/java-annotations");           break;
         }
+    }
+
+    private static void openUrl(String url) {
+        try {
+            Desktop.getDesktop().browse(new URI(url));
+        } catch (Exception ignored) {}
     }
 }

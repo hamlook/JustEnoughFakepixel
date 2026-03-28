@@ -78,7 +78,6 @@ public class ConfigProcessor {
                 try {
                     categoryObj = categoryField.get(config);
                 } catch (Exception e) {
-                    //System.err.printf("Failed to load config category %s. Field was not accessible.\n", categoryField.getName());
                     continue;
                 }
 
@@ -99,22 +98,28 @@ public class ConfigProcessor {
 
                         GuiOptionEditor editor = null;
                         Class<?> optionType = optionField.getType();
-                        if (optionType.isAssignableFrom(int.class) && optionField.isAnnotationPresent(ConfigEditorKeybind.class)) {
+
+                        // Version display — must come before the generic checks so Void fields
+                        // don't fall through to an unmatched branch and get silently dropped.
+                        if (optionField.isAnnotationPresent(ConfigEditorVersionDisplay.class)) {
+                            editor = new GuiOptionEditorVersionDisplay(option);
+                        }
+                        if (editor == null && optionType.isAssignableFrom(int.class) && optionField.isAnnotationPresent(ConfigEditorKeybind.class)) {
                             ConfigEditorKeybind configEditorAnnotation = optionField.getAnnotation(ConfigEditorKeybind.class);
                             editor = new GuiOptionEditorKeybind(option, (int) option.get(), configEditorAnnotation.defaultKey());
                         }
-                        if (optionField.isAnnotationPresent(ConfigEditorButton.class)) {
+                        if (editor == null && optionField.isAnnotationPresent(ConfigEditorButton.class)) {
                             ConfigEditorButton configEditorAnnotation = optionField.getAnnotation(ConfigEditorButton.class);
                             editor = new GuiOptionEditorButton(option, configEditorAnnotation.runnableId(), configEditorAnnotation.buttonText(), config);
                         }
-                        if (optionType.isAssignableFrom(boolean.class) && optionField.isAnnotationPresent(ConfigEditorBoolean.class)) {
+                        if (editor == null && optionType.isAssignableFrom(boolean.class) && optionField.isAnnotationPresent(ConfigEditorBoolean.class)) {
                             editor = new GuiOptionEditorBoolean(option);
                         }
-                        if (optionType.isAssignableFrom(boolean.class) && optionField.isAnnotationPresent(ConfigEditorAccordion.class)) {
+                        if (editor == null && optionType.isAssignableFrom(boolean.class) && optionField.isAnnotationPresent(ConfigEditorAccordion.class)) {
                             ConfigEditorAccordion configEditorAnnotation = optionField.getAnnotation(ConfigEditorAccordion.class);
                             editor = new GuiOptionEditorAccordion(option, configEditorAnnotation.id());
                         }
-                        if (optionType.isAssignableFrom(int.class)) {
+                        if (editor == null && optionType.isAssignableFrom(int.class)) {
                             if (optionField.isAnnotationPresent(ConfigEditorDropdown.class)) {
                                 ConfigEditorDropdown configEditorAnnotation = optionField.getAnnotation(ConfigEditorDropdown.class);
                                 editor = new GuiOptionEditorDropdown(option, configEditorAnnotation.values(), (int) option.get(), true);
@@ -122,13 +127,13 @@ public class ConfigProcessor {
                                 editor = new GuiOptionEditorStyle(option, (int) option.get());
                             }
                         }
-                        if (optionType.isAssignableFrom(List.class)) {
+                        if (editor == null && optionType.isAssignableFrom(List.class)) {
                             if (optionField.isAnnotationPresent(ConfigEditorDraggableList.class)) {
                                 ConfigEditorDraggableList configEditorAnnotation = optionField.getAnnotation(ConfigEditorDraggableList.class);
                                 editor = new GuiOptionEditorDraggableList(option, configEditorAnnotation.exampleText());
                             }
                         }
-                        if (optionType.isAssignableFrom(String.class)) {
+                        if (editor == null && optionType.isAssignableFrom(String.class)) {
                             if (optionField.isAnnotationPresent(ConfigEditorDropdown.class)) {
                                 ConfigEditorDropdown configEditorAnnotation = optionField.getAnnotation(ConfigEditorDropdown.class);
                                 editor = new GuiOptionEditorDropdown(option, configEditorAnnotation.values(), configEditorAnnotation.initialIndex(), false);
@@ -138,28 +143,19 @@ public class ConfigProcessor {
                                 editor = new GuiOptionEditorText(option);
                             }
                         }
-                        if (optionType.isAssignableFrom(int.class) || optionType.isAssignableFrom(float.class) || optionType.isAssignableFrom(double.class)) {
+                        if (editor == null && (optionType.isAssignableFrom(int.class) || optionType.isAssignableFrom(float.class) || optionType.isAssignableFrom(double.class))) {
                             if (optionField.isAnnotationPresent(ConfigEditorSliderAnnotation.class)) {
                                 ConfigEditorSliderAnnotation configEditorAnnotation = optionField.getAnnotation(ConfigEditorSliderAnnotation.class);
                                 editor = new GuiOptionEditorSlider(option, configEditorAnnotation.minValue(), configEditorAnnotation.maxValue(), configEditorAnnotation.minStep());
                             }
                         }
-                        if (optionType.isAssignableFrom(String.class)) {
-                            if (optionField.isAnnotationPresent(ConfigEditorDropdown.class)) {
-                                ConfigEditorDropdown configEditorAnnotation = optionField.getAnnotation(ConfigEditorDropdown.class);
-                                editor = new GuiOptionEditorDropdown(option, configEditorAnnotation.values(), 0, false);
-                            }
-                        }
                         if (editor == null) {
-                            //System.err.printf("Failed to load config option %s. Could not find suitable editor.\n", optionField.getName());
                             continue;
                         }
                         option.editor = editor;
                         cat.options.put(optionField.getName(), option);
                     }
                 }
-            } else if (exposePresent || categoryPresent) {
-                //System.err.printf("Failed to load config category %s. Both @Expose and @Category must be present.\n", categoryField.getName());
             }
         }
         return processedConfig;
