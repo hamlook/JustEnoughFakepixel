@@ -34,6 +34,7 @@ public class DungeonRoomDetector {
     private static JsonObject lastRoomJson = null;
     private final Executor executor = Executors.newFixedThreadPool(2);
 
+    @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.START) return;
         if (JefConfig.feature == null || !JefConfig.feature.dungeons.dungeonRoomOverlay) {
@@ -82,10 +83,15 @@ public class DungeonRoomDetector {
                 lastRoomHash = md5;
 
                 if (!roomsJson.has(md5)) {
-                    DungeonRoomOverlay.currentRoomName =
-                            "§cUnknown Room §7(" + md5.substring(0, 32) + ")";
-                    DungeonRoomOverlay.currentRoomNotes =
-                            "§8Hash not in JSON";
+                    if (JefConfig.feature.debug.dungeonRoomDebug) {
+                        DungeonRoomOverlay.currentRoomName =
+                                "§cUnknown Room §7(" + md5.substring(0, 32) + ")";
+                        DungeonRoomOverlay.currentRoomNotes =
+                                "§8Hash not in JSON";
+                    } else {
+                        DungeonRoomOverlay.currentRoomName = null;
+                        DungeonRoomOverlay.currentRoomNotes = null;
+                    }
 
                     lastRoomJson = null;
                     return;

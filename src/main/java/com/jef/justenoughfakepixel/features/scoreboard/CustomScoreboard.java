@@ -334,7 +334,7 @@ public class CustomScoreboard extends Overlay {
         if (lines.isEmpty()) return;
 
         boolean down = Keyboard.isKeyDown(JefConfig.feature.debug.scoreboardDebugKey);
-        if (down && !wasDown) {
+        if (down && !wasDown && JefConfig.feature.debug.scoreboardDebug) {
             Minecraft.getMinecraft().thePlayer.addChatMessage(
                     new ChatComponentText(CustomScoreboardAPI.toJson())
             );
