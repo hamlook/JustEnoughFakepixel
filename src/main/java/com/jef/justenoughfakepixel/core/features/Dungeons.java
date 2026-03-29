@@ -8,24 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Dungeons {
-
-
-    @Expose
-    @ConfigOption(name = "Water Board Solver", desc = "Water Board puzzle settings")
-    @ConfigEditorAccordion(id = 50)
-    public boolean waterSolverAccordion = false;
-
-    @Expose
-    @ConfigOption(name = "Enable", desc = "Show Water Board lever order and countdown timers")
-    @ConfigEditorBoolean
-    @ConfigAccordionId(id = 50)
-    public boolean waterSolver = false;
-
-    @Expose
-    @ConfigOption(name = "Optimized", desc = "Use the optimized (faster) solution route instead of the safe route")
-    @ConfigEditorBoolean
-    @ConfigAccordionId(id = 50)
-    public boolean waterSolverOptimized = false;
+    
 
     @Expose
     @ConfigOption(name = "Blood Mob Highlight", desc = "Highlight blood room mobs. Box = bounding box, Outline = body glow, Off = disabled")

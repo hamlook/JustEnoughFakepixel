@@ -6,10 +6,12 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.StringUtils;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.Color;
+import java.util.List;
 
 public final class WorldRenderUtils {
 
@@ -98,6 +100,152 @@ public final class WorldRenderUtils {
         mc.fontRendererObj.drawStringWithShadow(text, -w / 2f, 0f, 0xFFFFFF);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glPopMatrix();
+    }
+
+    public static void drawSelectionBox(BlockPos pos, Color color, float lineWidth) {
+        double vx = mc.getRenderManager().viewerPosX;
+        double vy = mc.getRenderManager().viewerPosY;
+        double vz = mc.getRenderManager().viewerPosZ;
+
+        double x = pos.getX() - vx;
+        double y = pos.getY() - vy;
+        double z = pos.getZ() - vz;
+
+        int r = color.getRed(), g = color.getGreen(), b = color.getBlue(), a = color.getAlpha();
+
+        final double[][] edges = {
+                {0,0,0,1,0,0},{0,0,1,1,0,1},{0,0,0,0,0,1},{1,0,0,1,0,1},
+                {0,1,0,1,1,0},{0,1,1,1,1,1},{0,1,0,0,1,1},{1,1,0,1,1,1},
+                {0,0,0,0,1,0},{1,0,0,1,1,0},{0,0,1,0,1,1},{1,0,1,1,1,1}
+        };
+
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glDepthFunc(GL11.GL_LEQUAL);
+        GL11.glDepthMask(false);
+        GL11.glLineWidth(lineWidth);
+        GL11.glPushMatrix();
+
+        Tessellator tess = Tessellator.getInstance();
+        WorldRenderer wr = tess.getWorldRenderer();
+        wr.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
+        for (double[] e : edges) {
+            wr.pos(x + e[0], y + e[1], z + e[2]).color(r, g, b, a).endVertex();
+            wr.pos(x + e[3], y + e[4], z + e[5]).color(r, g, b, a).endVertex();
+        }
+        tess.draw();
+
+        GL11.glPopMatrix();
+        GL11.glPopAttrib();
+        GL11.glColor4f(1f, 1f, 1f, 1f);
+    }
+
+    public static void drawFilledBlocks(List<BlockPos> blocks, Color color) {
+        if (blocks == null || blocks.isEmpty() || mc.getRenderManager() == null) return;
+
+        double vx = mc.getRenderManager().viewerPosX;
+        double vy = mc.getRenderManager().viewerPosY;
+        double vz = mc.getRenderManager().viewerPosZ;
+
+        int r = color.getRed();
+        int g = color.getGreen();
+        int b = color.getBlue();
+        int a = color.getAlpha();
+
+        // small expansion to avoid z-fighting
+        double eps = 0.002;
+
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+
+        GlStateManager.disableTexture2D();
+        GlStateManager.disableLighting();
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        // IMPORTANT: respect depth (no render through walls)
+        GlStateManager.enableDepth();
+        GL11.glDepthMask(true);
+
+        // fix z-fighting properly
+        GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
+        GL11.glPolygonOffset(-1.0f, -1.0f);
+
+        GlStateManager.disableCull();
+
+        GL11.glPushMatrix();
+        GL11.glTranslated(-vx, -vy, -vz);
+
+        Tessellator tess = Tessellator.getInstance();
+        WorldRenderer wr = tess.getWorldRenderer();
+        wr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+
+        for (BlockPos pos : blocks) {
+
+            double x0 = pos.getX() - eps;
+            double y0 = pos.getY() - eps;
+            double z0 = pos.getZ() - eps;
+
+            double x1 = pos.getX() + 1 + eps;
+            double y1 = pos.getY() + 1 + eps;
+            double z1 = pos.getZ() + 1 + eps;
+
+            // Bottom
+            wr.pos(x0, y0, z0).color(r, g, b, a).endVertex();
+            wr.pos(x1, y0, z0).color(r, g, b, a).endVertex();
+            wr.pos(x1, y0, z1).color(r, g, b, a).endVertex();
+            wr.pos(x0, y0, z1).color(r, g, b, a).endVertex();
+
+            // Top
+            wr.pos(x0, y1, z0).color(r, g, b, a).endVertex();
+            wr.pos(x0, y1, z1).color(r, g, b, a).endVertex();
+            wr.pos(x1, y1, z1).color(r, g, b, a).endVertex();
+            wr.pos(x1, y1, z0).color(r, g, b, a).endVertex();
+
+            // North
+            wr.pos(x0, y0, z0).color(r, g, b, a).endVertex();
+            wr.pos(x0, y1, z0).color(r, g, b, a).endVertex();
+            wr.pos(x1, y1, z0).color(r, g, b, a).endVertex();
+            wr.pos(x1, y0, z0).color(r, g, b, a).endVertex();
+
+            // South
+            wr.pos(x0, y0, z1).color(r, g, b, a).endVertex();
+            wr.pos(x1, y0, z1).color(r, g, b, a).endVertex();
+            wr.pos(x1, y1, z1).color(r, g, b, a).endVertex();
+            wr.pos(x0, y1, z1).color(r, g, b, a).endVertex();
+
+            // West
+            wr.pos(x0, y0, z0).color(r, g, b, a).endVertex();
+            wr.pos(x0, y0, z1).color(r, g, b, a).endVertex();
+            wr.pos(x0, y1, z1).color(r, g, b, a).endVertex();
+            wr.pos(x0, y1, z0).color(r, g, b, a).endVertex();
+
+            // East
+            wr.pos(x1, y0, z0).color(r, g, b, a).endVertex();
+            wr.pos(x1, y1, z0).color(r, g, b, a).endVertex();
+            wr.pos(x1, y1, z1).color(r, g, b, a).endVertex();
+            wr.pos(x1, y0, z1).color(r, g, b, a).endVertex();
+        }
+
+        tess.draw();
+
+        GL11.glPopMatrix();
+
+        GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
+
+        GlStateManager.enableCull();
+        GlStateManager.disableBlend();
+        GlStateManager.enableTexture2D();
+        GlStateManager.enableLighting();
+
+        GL11.glPopAttrib();
+    }
+
+    public static void drawFilledBlock(BlockPos pos, Color color) {
+        drawFilledBlocks(java.util.Collections.singletonList(pos), color);
     }
 
     public static void beginWorldRender(float lineWidth) {

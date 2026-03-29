@@ -181,4 +181,33 @@ public class Qol {
     @ConfigOption(name = "Missing Enchants", desc = "Hold SHIFT on an enchanted item to see missing enchants")
     @ConfigEditorBoolean
     public boolean missingEnchants = true;
+
+    @Expose
+    @ConfigOption(name = "Block Selection Overlay", desc = "Customize the block selection highlight")
+    @ConfigEditorAccordion(id = 22)
+    public boolean blockSelectionAccordion = false;
+
+    @Expose
+    @ConfigOption(name = "Enable", desc = "Replace the vanilla block selection outline with a custom one")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 22)
+    public boolean blockSelectionOverlay = false;
+
+    @Expose
+    @ConfigOption(name = "Mode", desc = "Filled: solid color fill | Outline: configurable box outline")
+    @ConfigEditorDropdown(values = {"Filled", "Outline"})
+    @ConfigAccordionId(id = 22)
+    public int blockSelectionMode = 1;
+
+    @Expose
+    @ConfigOption(name = "Outline Thickness", desc = "Thickness of the outline when in Outline mode")
+    @ConfigEditorSliderAnnotation(minValue = 0.5f, maxValue = 5f, minStep = 0.5f)
+    @ConfigAccordionId(id = 22)
+    public float blockSelectionThickness = 2f;
+
+    @Expose
+    @ConfigOption(name = "Color", desc = "Color of the block highlight")
+    @ConfigEditorColour
+    @ConfigAccordionId(id = 22)
+    public String blockSelectionColor = "180:255:255:255:255";
 }
