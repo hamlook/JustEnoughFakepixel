@@ -210,4 +210,9 @@ public class Qol {
     @ConfigOption(name = "Missing Enchants", desc = "Hold SHIFT on an enchanted item to see missing enchants")
     @ConfigEditorBoolean
     public boolean missingEnchants = true;
+
+    @Expose
+    @ConfigOption(name = "Confirm Disconnect", desc = "Makes you click twice to disconnect")
+    @ConfigEditorBoolean
+    public boolean confirmDisconnect = true;
 }
