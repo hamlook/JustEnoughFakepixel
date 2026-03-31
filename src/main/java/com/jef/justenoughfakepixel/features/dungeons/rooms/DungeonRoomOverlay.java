@@ -16,11 +16,13 @@ import java.util.List;
 public class DungeonRoomOverlay extends Overlay {
 
     private static DungeonRoomOverlay instance;
-    public static String currentRoomName = null;
-    public static String currentRoomNotes = null;
+    public static String  currentRoomName         = null;
+    public static String  currentRoomCategory     = null;
+    public static String  currentRoomNotes        = null;
+    public static boolean currentRoomHasFairySoul = false;
 
     public DungeonRoomOverlay() {
-        super(100, 20);
+        super(130, 20);
         instance = this;
     }
 
@@ -47,18 +49,45 @@ public class DungeonRoomOverlay extends Overlay {
         List<String> out = new ArrayList<>();
 
         if (preview) {
-            out.add(EnumChatFormatting.AQUA + "Room: " + EnumChatFormatting.GREEN + "Puzzle" + EnumChatFormatting.WHITE + " - " + EnumChatFormatting.GREEN + "Box" + EnumChatFormatting.WHITE + " [" + EnumChatFormatting.YELLOW + "3 secrets" + EnumChatFormatting.WHITE + "]");
-            out.add(EnumChatFormatting.YELLOW + "Example note about this room");
+            out.add(EnumChatFormatting.GRAY + "Category  " + EnumChatFormatting.LIGHT_PURPLE + "Puzzle");
+            out.add(EnumChatFormatting.WHITE + "\u2756  " + EnumChatFormatting.AQUA + "Box" + EnumChatFormatting.DARK_PURPLE + "  \u273f");
+            out.add(EnumChatFormatting.YELLOW + "\u270e  " + EnumChatFormatting.WHITE + "Example note about this room");
             return out;
         }
 
         if (currentRoomName != null) {
-            out.add(EnumChatFormatting.AQUA + "Room: " + EnumChatFormatting.GREEN + currentRoomName);
+            // Line 1: category with colour-coded label
+            String categoryColor = getCategoryColor(currentRoomCategory);
+            out.add(EnumChatFormatting.GRAY + "Category  "
+                    + categoryColor + (currentRoomCategory != null ? currentRoomCategory : "Unknown"));
+
+            // Line 2: room name, with optional fairy soul indicator
+            String nameLine = EnumChatFormatting.WHITE + "\u2756  " + EnumChatFormatting.AQUA + currentRoomName;
+            if (currentRoomHasFairySoul) {
+                nameLine += "  " + EnumChatFormatting.DARK_PURPLE + "\u273f";
+            }
+            out.add(nameLine);
+
+            // Line 3: notes — only shown when present
             if (currentRoomNotes != null) {
-                out.add(EnumChatFormatting.YELLOW + currentRoomNotes);
+                out.add(EnumChatFormatting.YELLOW + "\u270e  " + EnumChatFormatting.WHITE + currentRoomNotes);
             }
         }
 
         return out;
+    }
+
+    /** Returns a colour code to match the dungeon room category. */
+    private String getCategoryColor(String category) {
+        if (category == null) return EnumChatFormatting.WHITE.toString();
+        switch (category.toLowerCase()) {
+            case "puzzle":   return EnumChatFormatting.LIGHT_PURPLE.toString();
+            case "trap":     return EnumChatFormatting.RED.toString();
+            case "miniboss": return EnumChatFormatting.GOLD.toString();
+            case "fairy":    return EnumChatFormatting.DARK_PURPLE.toString();
+            case "rare":     return EnumChatFormatting.YELLOW.toString();
+            case "champion": return EnumChatFormatting.RED.toString();
+            default:         return EnumChatFormatting.GREEN.toString();
+        }
     }
 }

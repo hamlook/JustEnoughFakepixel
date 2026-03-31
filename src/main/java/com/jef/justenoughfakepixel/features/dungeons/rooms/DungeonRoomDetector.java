@@ -38,8 +38,10 @@ public class DungeonRoomDetector {
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.START) return;
         if (JefConfig.feature == null || !JefConfig.feature.dungeons.dungeonRoomOverlay) {
-            DungeonRoomOverlay.currentRoomName = null;
-            DungeonRoomOverlay.currentRoomNotes = null;
+            DungeonRoomOverlay.currentRoomName         = null;
+            DungeonRoomOverlay.currentRoomCategory     = null;
+            DungeonRoomOverlay.currentRoomNotes        = null;
+            DungeonRoomOverlay.currentRoomHasFairySoul = false;
             lastRoomHash = null;
             lastRoomJson = null;
             return;
@@ -84,13 +86,15 @@ public class DungeonRoomDetector {
 
                 if (!roomsJson.has(md5)) {
                     if (JefConfig.feature.debug.dungeonRoomDebug) {
-                        DungeonRoomOverlay.currentRoomName =
-                                "§cUnknown Room §7(" + md5.substring(0, 32) + ")";
-                        DungeonRoomOverlay.currentRoomNotes =
-                                "§8Hash not in JSON";
+                        DungeonRoomOverlay.currentRoomCategory     = "Debug";
+                        DungeonRoomOverlay.currentRoomName         = "§cUnknown §7(" + md5.substring(0, 32) + ")";
+                        DungeonRoomOverlay.currentRoomNotes        = "§8Hash not in JSON";
+                        DungeonRoomOverlay.currentRoomHasFairySoul = false;
                     } else {
-                        DungeonRoomOverlay.currentRoomName = null;
-                        DungeonRoomOverlay.currentRoomNotes = null;
+                        DungeonRoomOverlay.currentRoomName         = null;
+                        DungeonRoomOverlay.currentRoomCategory     = null;
+                        DungeonRoomOverlay.currentRoomNotes        = null;
+                        DungeonRoomOverlay.currentRoomHasFairySoul = false;
                     }
 
                     lastRoomJson = null;
@@ -129,22 +133,16 @@ public class DungeonRoomDetector {
     }
 
     private void setOverlay(JsonObject room) {
-        String name = room.get("name").getAsString();
+        String name     = room.get("name").getAsString();
         String category = room.get("category").getAsString();
-        int secrets = room.get("secrets").getAsInt();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(category).append(" - ").append(name);
-        sb.append(" §f[§e").append(secrets).append("§f secrets]");
-
-        JsonElement fairysoul = room.get("fairysoul");
-        if (fairysoul != null) sb.append(" §d✿");
+        // Populate the new separate fields — secrets are intentionally not displayed
+        DungeonRoomOverlay.currentRoomCategory     = category;
+        DungeonRoomOverlay.currentRoomName         = name;
+        DungeonRoomOverlay.currentRoomHasFairySoul = room.has("fairysoul");
 
         JsonElement notes = room.get("notes");
-        if (notes != null) DungeonRoomOverlay.currentRoomNotes = notes.getAsString();
-        else DungeonRoomOverlay.currentRoomNotes = null;
-
-        DungeonRoomOverlay.currentRoomName = sb.toString();
+        DungeonRoomOverlay.currentRoomNotes = (notes != null) ? notes.getAsString() : null;
     }
 
     private void loadRoomsJson() {
