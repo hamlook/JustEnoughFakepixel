@@ -23,9 +23,6 @@ public class SkillXpDisplay {
 
     private static final String HINT = EnumChatFormatting.DARK_GRAY + "[SHIFT: XP to max level]";
 
-    // XP required per level. Index i = XP to go from level i to level i+1.
-    // Sum of [0..N-1] = total XP to reach level N.
-
     private static final long[] STANDARD_XP = {
             50,125,200,300,500,750,1000,1500,2000,3500,
             5000,7500,10000,15000,20000,30000,50000,75000,100000,200000,
@@ -43,13 +40,7 @@ public class SkillXpDisplay {
             15000000,19000000,24000000,30000000,38000000,48000000,60000000,75000000,93000000,116250000
     };
 
-    private static final long[] SOCIAL_XP = {
-            50,100,150,250,500,750,1000,1250,1500,2000,
-            2500,3000,3750,4500,6000,8000,10000,12500,15000,20000,
-            25000,30000,35000,40000,50000
-    };
-
-    private static final long[] RUNECRAFTING_XP = {
+    private static final long[] RUNE_SOCIAL_XP = {
             50,100,125,160,200,250,315,400,500,625,
             785,1000,1250,1565,2000,2500,3125,4000,5000,6250,
             7850,9800,12250,15300,19100
@@ -79,10 +70,10 @@ public class SkillXpDisplay {
             table    = DUNGEON_XP;
             maxLevel = 50;
         } else if (name.contains("social")) {
-            table    = SOCIAL_XP;
+            table    = RUNE_SOCIAL_XP;
             maxLevel = 25;
         } else if (name.contains("runecrafting")) {
-            table    = RUNECRAFTING_XP;
+            table    = RUNE_SOCIAL_XP;
             maxLevel = 25;
         } else {
             table    = STANDARD_XP;
@@ -116,14 +107,12 @@ public class SkillXpDisplay {
                 + EnumChatFormatting.YELLOW + formatXp(remaining));
     }
 
-    // Sum of table[0..level-1] = total XP to reach level `level`
     private static long totalXpForLevel(long[] table, int level) {
         long total = 0;
         for (int i = 0; i < level && i < table.length; i++) total += table[i];
         return total;
     }
 
-    // "Progress to Level 33:" → current level = 32
     private static int parseLevel(List<String> tooltip) {
         for (String line : tooltip) {
             Matcher m = PROGRESS_LINE.matcher(strip(line));
@@ -132,11 +121,10 @@ public class SkillXpDisplay {
         return -1;
     }
 
-    // Finds "48,952,712/75M" style line and returns the left number
     private static long parseCurrentXp(List<String> tooltip) {
         for (String line : tooltip) {
             String clean = strip(line).trim();
-            if (clean.startsWith("\u2014") || clean.startsWith("-")) clean = clean.substring(1).trim();
+            if (clean.startsWith("—") || clean.startsWith("-")) clean = clean.substring(1).trim();
             Matcher m = XP_LINE.matcher(clean);
             if (m.find()) {
                 try { return Long.parseLong(m.group(1).replace(",", "")); }
@@ -165,6 +153,6 @@ public class SkillXpDisplay {
     }
 
     private static String strip(String s) {
-        return s == null ? "" : s.replaceAll("(?i)\u00a7.", "");
+        return s == null ? "" : s.replaceAll("(?i)§.", "");
     }
 }
