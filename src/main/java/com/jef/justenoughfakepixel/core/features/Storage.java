@@ -17,7 +17,7 @@ public class Storage {
 
     @Expose
     @ConfigOption(name = "Scroll Speed", desc = "Control how fast the scrolling in the storage overlay is")
-    @ConfigEditorSliderAnnotation(minValue = 0.25f, maxValue = 3f, minStep = 0.05f)
+    @ConfigEditorSliderAnnotation(minValue = 0.1f, maxValue = 3f, minStep = 0.01f)
     @ConfigAccordionId(id = 1)
     public float scrollSpeed = 1;
 
@@ -27,4 +27,21 @@ public class Storage {
     @ConfigAccordionId(id = 1)
     public boolean smoothScroll = false;
 
+    @Expose
+    @ConfigOption(name = "Horizontal Scrolling", desc = "Make the Scrolling system be horizontal instead of vertical")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 1)
+    public boolean horizontalScroll = false;
+
+    @Expose
+    @ConfigOption(name = "Drag Scrolling", desc = "Scroll by dragging your mouse")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 1)
+    public boolean dragScroll = true;
+
+    @Expose
+    @ConfigOption(name = "Scrolling Bar",desc = "Scroll by using a scrolling bar")
+    @ConfigEditorBoolean
+    @ConfigAccordionId(id = 1)
+    public boolean barScroll = true;
 }
