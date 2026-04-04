@@ -2,6 +2,7 @@ package com.jef.justenoughfakepixel.features.dungeons.caseopening;
 
 import com.jef.justenoughfakepixel.DebugLogger;
 import com.jef.justenoughfakepixel.core.JefConfig;
+import com.jef.justenoughfakepixel.core.config.utils.StringUtils;
 import com.jef.justenoughfakepixel.init.RegisterEvents;
 import com.jef.justenoughfakepixel.features.dungeons.overlays.DungeonStats;
 import com.jef.justenoughfakepixel.features.dungeons.utils.DungeonFloor;
@@ -153,9 +154,14 @@ public class ChestListener {
         Slot hovered = chest.getSlotUnderMouse();
         if (hovered == null || !hovered.getHasStack()) return;
 
-        boolean isObSlot = hovered.slotNumber == 15 && !crOpenedChestOb.containsKey(chestID);
-        boolean isBrSlot = hovered.slotNumber == 16 && !crOpenedChestBr.containsKey(chestID);
-        if (!isObSlot && !isBrSlot) return;
+        String name = hovered.getStack().getDisplayName();
+
+        name = StringUtils.cleanColour(name);
+        name = StringUtils.clean(name);
+
+        boolean isObChest = name.equalsIgnoreCase("Obsidian") && !crOpenedChestOb.containsKey(chestID);
+        boolean isBrChest = name.equalsIgnoreCase("Bedrock") && !crOpenedChestBr.containsKey(chestID);
+        if (!isObChest && !isBrChest) return;
 
         if (event.toolTip.size() > 3) {
             String first = event.toolTip.get(0);
